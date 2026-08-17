@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.lua.j2": "jinja-lua"
+    },
+    "luau-lsp.ignoreGlobs": [
+        "**/code_gen/**"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:venv",
+    "python-envs.defaultPackageManager": "ms-python.python:pip"
+}
