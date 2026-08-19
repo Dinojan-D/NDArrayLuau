@@ -3,5 +3,10 @@
         "fillMethod": "native",
         "sOpMethods": "classic",
         "bOpMethods": "classic"
+    },
+    "u8": {
+        "fillMethod": "native",
+        "sOpMethods": "classic",
+        "bOpMethods": "classic"
     }
 }

@@ -69,3 +69,17 @@ def generate_kernel(dtype:str):
     output_path.write_text(final_code, encoding="utf-8")
 
     print(f"\n{dtype} Kernel is generated in {OUTPUT_DIR}.\n")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="NDArray kernel generator.")
+
+    parser.add_argument('dtypes', metavar='DTYPE', type=str, nargs='+')
+
+    args = parser.parse_args()
+
+    for dtype in args.dtypes:
+        generate_kernel(dtype)
+
+if __name__ == "__main__":
+    main()

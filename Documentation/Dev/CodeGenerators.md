@@ -29,3 +29,5 @@ This pipeline provides a data-driven, template-based code generator that produce
 ## IDE Setup Recommendation
 
 Install a Jinja2 Extension in your code editor (e.g., Jinja or Better Jinja in VS Code). Configure .j2 or .luau.j2 file extensions to render with Jinja/Lua formatting to enable syntax highlighting and maintain template readability.
+
+# Testings script generators
