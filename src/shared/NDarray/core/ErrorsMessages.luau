@@ -22,6 +22,12 @@ local ErrorsMessages = {}
 
 type ErrorType = "ValueError" | "IndexError" | "TypeError" | "NotImplementedError" | "RuntimeError" | "AssertionError" | "MemoryError" | "OverflowError" | "UnderflowError" | "ZeroDivisionError" | "AttributeError" | "KeyError" | "ImportError" | "NameError" | "SyntaxError" | "IndentationError" | "TabError" | "SystemExit" | "KeyboardInterrupt"
 
+
+local function tableToString(t):string
+    return "{"..table.concat(t,",").."}"
+end
+
+
 --[=[
     PRIVATE USE
 
@@ -36,6 +42,23 @@ function ErrorsMessages.Formatter(errorType:ErrorType,message:string,...):string
     return "["..errorType.."] "..string.format(message,...)
 end
 
+function ErrorsMessages.InvalidShape(shape: {number}): string
+    return ErrorsMessages.Formatter(
+        'ValueError', "Invalid shape %s. Each dimension must be a strictly positive integer.",
+        tableToString(shape)
+    )
+end
 
+function ErrorsMessages.BufferMismatch(expected: number, got: number): string
+    return ErrorsMessages.Formatter(
+        "ValueError","Buffer size mismatch. Expected %d bytes, got %d bytes.",
+        expected,
+        got
+    )
+end
+
+function ErrorsMessages.StridesMismatch(expected:number,got:number):string
+    return ErrorsMessages.Formatter("ValueError","Number of strides (%d) must match shape rank (%d).",got,expected)
+end
 
 return ErrorsMessages
