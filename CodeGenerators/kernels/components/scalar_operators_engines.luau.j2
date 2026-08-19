@@ -1,0 +1,10 @@
+{%macro classic(dtype,op_name, op_symbol,item_size)%}
+function Kernel.{{ op_name }}S(b: buffer, offset: number, scalar: number, count: number?)
+    local _size = if count then offset+count*item_size else buffer_len(b)
+    _size -=1
+    
+    for pointer = offset, _size,item_size do
+        buffer_write{{dtype}}(b, pointer, buffer_read{{dtype}}(b, pointer) {{ op_symbol }} scalar)        
+    end
+end
+{%endmacro%}

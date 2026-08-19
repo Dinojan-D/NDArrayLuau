@@ -1,10 +1,18 @@
 {
     "files.associations": {
-        "*.lua.j2": "jinja-lua"
+        "*.luau.j2": "jinja-lua"
     },
     "luau-lsp.ignoreGlobs": [
-        "**/code_gen/**"
+        "**/CodeGenerators/**"
     ],
     "python-envs.defaultEnvManager": "ms-python.python:venv",
-    "python-envs.defaultPackageManager": "ms-python.python:pip"
+    "python-envs.defaultPackageManager": "ms-python.python:pip",
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "CodeGenerators/kernels/.config.json"
+            ],
+            "url": "./CodeGenerators/kernels/config_schema.json"
+        }
+    ]
 }

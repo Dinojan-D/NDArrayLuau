@@ -1,0 +1,7 @@
+{
+    "i8": {
+        "fillMethod": "native",
+        "sOpMethods": "classic",
+        "bOpMethods": "classic"
+    }
+}

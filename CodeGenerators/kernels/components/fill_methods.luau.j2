@@ -1,0 +1,6 @@
+{% macro native() %}
+local buffer_fill = buffer.fill
+function Kernel.fill(b: buffer, offset: number, value: number, count: number?)
+    buffer_fill(b,offset,value,count)
+end 
+{% endmacro %}

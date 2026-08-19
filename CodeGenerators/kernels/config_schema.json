@@ -1,0 +1,45 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "propertyNames": {
+        "enum": [
+            "i8",
+            "i16",
+            "i32",
+            "u8",
+            "u16",
+            "u32",
+            "f32",
+            "f64"
+        ]
+    },
+    "additionalProperties": {
+        "type": "object",
+        "properties": {
+            "fillMethod": {
+                "type": "string",
+                "enum": [
+                    "native"
+                ]
+            },
+            "sOpMethods": {
+                "type": "string",
+                "enum": [
+                    "classic"
+                ]
+            },
+            "bOpMethods": {
+                "type": "string",
+                "enum": [
+                    "classic"
+                ]
+            }
+        },
+        "required": [
+            "fillMethod",
+            "sOpMethods",
+            "bOpMethods"
+        ],
+        "additionalProperties": false
+    }
+}

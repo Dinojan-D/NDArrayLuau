@@ -1,0 +1,55 @@
+--[=[
+    ===============================================================================
+                        AUTO-GENERATED FILE, DO NOT EDIT IT MANUALLY !
+    ===============================================================================
+
+    Recommanded to only add dirrective native command (@native or --!native).
+
+    date:{{date}}
+]=]
+
+--[=[
+    ===============================================================================
+                                  {{dtype}}-Bits Kernel
+    ===============================================================================
+
+
+    PRIVATE USE
+
+    Implements low-level operations for all {{dtype}}-bits {{value_type}} data types.
+
+    All operations work directly on raw buffers for maximum performance.
+]=]
+
+local types = require(script.Parent.Parent.types)
+
+---------------------------------------------------------------------------------------------------
+-- Functions Localization
+---------------------------------------------------------------------------------------------------
+
+local buffer_len = buffer.len
+local buffer_read{{dtype}} = buffer.read{{dtype}}
+local buffer_write{{dtype}} = buffer.write{{dtype}}
+
+---------------------------------------------------------------------------------------------------
+{% import "components/fill_methods.luau.j2" as fill_methods %}
+{% import "components/scalar_operators_engines.luau.j2" as scalar_operators_engines %}
+{% import "components/b_to_b_operators_engines.luau.j2" as b_to_b_operators_engines %}
+
+local Kernel = {}::types.Kernel
+
+--the byte size of the data type
+local item_size = {{byte_size}}
+
+
+---------------------------------------------------------------------------------------------------
+-- Scalar Transformations
+---------------------------------------------------------------------------------------------------
+{{ fill_methods[config.fillMethod]()}}
+
+---------------------------------------------------------------------------------------------------
+-- Scalar Transformations By Math Operators
+---------------------------------------------------------------------------------------------------
+{% for op_name, op_symbol in arithmetic_operators.items() %}
+    {{ scalar_operators_engines[config.sOpMethods](dtype, op_name, op_symbol,item_size) }}
+{% endfor %}

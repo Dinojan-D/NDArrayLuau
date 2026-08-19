@@ -1,0 +1,15 @@
+{
+    "DataType": {
+        "i": "signed-integer",
+        "f64": "double-precision-float",
+        "f32": "single-precision-float",
+        "u": "unsigned-integer"
+    },
+    "ArithmeticOperators": {
+        "add": "+",
+        "mul": "*",
+        "idiv": "//",
+        "mod": "%",
+        "pow": "^"
+    }
+}
