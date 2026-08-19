@@ -10,18 +10,24 @@ type TestOptions = {
 	debug: boolean?,
 }
 
-return function (directoryName:string, config: TestOptions)
+return function (directoryName:string, config: TestOptions?)
     local directory = ReplicatedStorage:FindFirstChild("tests")
     if (directoryName ~= "*") then
         -- '*' means run all tests, so we don't need to find a specific directory
         directory = directory:FindFirstChild(directoryName) 
     end
 
+    if (not config) then
+       config = {
+        expand = true,
+        debug = true,
+       } :: TestOptions
+    end
     local processServiceExists, ProcessService = pcall(function()
         return game:GetService("ProcessService")
     end)
 
-    local status, result = runCLI(ReplicatedStorage, config, {directory}):awaitStatus()
+    local status, result = runCLI(ReplicatedStorage,  config, {directory}):awaitStatus()
 
     if status == "Rejected" then
         print(result)

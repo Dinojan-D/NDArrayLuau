@@ -81,6 +81,22 @@ export type DtypeMetadata = {
 }
 
 --[=[
+	Represents an axis slice equivalent to Python's `[start:stop:step]` syntax.
+
+	Defines a half-open interval **[start, stop)** using 0-indexed coordinates.
+
+	- `start` : Starting index **inclusive** (default: 0, or end if `step` < 0).
+	- `stop` : Ending index **exclusive** (default: dimension size, or start if `step` < 0).
+	- `step` : Step increment, positive or negative (default: 1).
+]=]
+export type Slices = {
+    start:number?,
+    stop:number?,
+    step:number?,
+}
+
+
+--[=[
     Defines the interface implemented by all computation kernels.
 
     A kernel performs low-level numerical operations directly on a raw buffer.
