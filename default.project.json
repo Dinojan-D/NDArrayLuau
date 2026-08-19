@@ -5,6 +5,12 @@
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/shared"
+      },
+      "DevPackages": {
+        "$path": "DevPackages"
+      },
+      "tests": {
+        "$path": "src/__tests__"
       }
     },
     "ServerScriptService": {

@@ -2,11 +2,47 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Generate Kernel",
+            "label": "GenerateCode: Kernel",
             "type": "shell",
             "command": "${workspaceFolder}/.venv/Scripts/python.exe CodeGenerators/kernels/renderer.py ${input:pickDtypes}",
             "group": {
                 "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Test: Run All",
+            "type": "shell",
+            "command": "rojo build -o NDArrayLuau.rbxl default.project.json ; run-in-roblox --place NDArrayLuau.rbxl --script scripts/run-all-tests.luau",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Test: Run Utils",
+            "type": "shell",
+            "command": "rojo build -o NDArrayLuau.rbxl default.project.json ; run-in-roblox --place NDArrayLuau.rbxl --script scripts/utils-tests.luau",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Test: Run Kernels",
+            "type": "shell",
+            "command": "rojo build -o NDArrayLuau.rbxl default.project.json ; run-in-roblox --place NDArrayLuau.rbxl --script scripts/kernels-tests.luau",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Test: Run API",
+            "type": "shell",
+            "command": "rojo build -o NDArrayLuau.rbxl default.project.json ; run-in-roblox --place NDArrayLuau.rbxl --script scripts/api-tests.luau",
+            "group": {
+                "kind": "test",
                 "isDefault": true
             }
         }
