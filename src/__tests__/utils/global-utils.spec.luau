@@ -118,3 +118,119 @@ describe("Utils.isContiguous", function()
     end)
 
 end)
+
+describe("Utils.unpackSlice", function()
+    it("should assign default values for an empty slice (equivalent to [:])", function()
+        local slice = {}::types.Slices
+        Utils.unpackSlice(slice)
+        expect(slice.step).toBe(1)
+        expect(slice.start).toBe(0)
+        expect(slice.stop).toBe(math.huge)
+    end)
+
+    it("should assign default values for a negative step (equivalent to [::-1])", function()
+        local slice = { step = -1 }::types.Slices
+        Utils.unpackSlice(slice)
+        expect(slice.step).toBe(-1)
+        expect(slice.start).toBe(math.huge)
+        expect(slice.stop).toBe(-math.huge)
+    end)
+
+    it("should throw an error if step is equal to 0", function()
+        expect(function()
+            Utils.unpackSlice({ step = 0 })
+        end).toThrow()
+    end)
+
+    it("should throw an error if indices are not integers", function()
+        expect(function() Utils.unpackSlice({ start = 1.5 }) end).toThrow()
+        expect(function() Utils.unpackSlice({ start = "a" }) end).toThrow()
+        expect(function() Utils.unpackSlice({ start = -2.1 }) end).toThrow()
+
+        expect(function() Utils.unpackSlice({ step = 1.5 }) end).toThrow()
+        expect(function() Utils.unpackSlice({ step = "a" }) end).toThrow()
+        expect(function() Utils.unpackSlice({ step = -2.1 }) end).toThrow()
+
+        expect(function() Utils.unpackSlice({ stop = 1.5 }) end).toThrow()
+        expect(function() Utils.unpackSlice({ stop = "a" }) end).toThrow()
+        expect(function() Utils.unpackSlice({ stop = -2.1 }) end).toThrow()
+    end)
+
+    it("should preserve explicit values", function()
+        local slice = { start = 2, stop = 5, step = 2 }::types.Slices
+        Utils.unpackSlice(slice)
+        expect(slice.start).toBe(2)
+        expect(slice.stop).toBe(5)
+        expect(slice.step).toBe(2)
+    end)
+
+end)
+
+describe("Utils.computeLenghtFromSlice", function()
+    local DIM = 10
+
+    it("should return total dimension for a full slice [:]", function()
+        local slice = {}::types.Slices
+        local length = Utils.computeLenghtFromSlice(DIM, slice)
+        expect(length).toBe(10)
+        expect(slice.start).toBe(0)
+        expect(slice.stop).toBe(10)
+    end)
+
+    it("should compute length for a standard slice [2:7]", function()
+        local length = Utils.computeLenghtFromSlice(DIM, { start = 2, stop = 7 })
+        expect(length).toBe(5) -- Indices 2, 3, 4, 5, 6
+    end)
+
+    it("should handle step greater than 1 [1:8:2]", function()
+        local length = Utils.computeLenghtFromSlice(DIM, { start = 1, stop = 8, step = 2 })
+        expect(length).toBe(4) -- Indices 1, 3, 5, 7
+    end)
+
+    it("should handle negative indices [-4:-1]", function()
+        -- En Python, pour dim=10, [-4:-1] équivaut à [6:9]
+        local slice = { start = -4, stop = -1 }::types.Slices
+        local length = Utils.computeLenghtFromSlice(DIM, slice)
+        expect(length).toBe(3)
+        expect(slice.start).toBe(6)
+        expect(slice.stop).toBe(9)
+    end)
+
+    it("should reverse iteration with a negative step [::-1]", function()
+        local slice = { step = -1 }::types.Slices
+        local length = Utils.computeLenghtFromSlice(DIM, slice)
+        expect(length).toBe(10)
+        expect(slice.start).toBe(9)
+        expect(slice.stop).toBe(-1)
+    end)
+
+    it("should correctly compute [7:2:-1]", function()
+        local length = Utils.computeLenghtFromSlice(DIM, { start = 7, stop = 2, step = -1 })
+        expect(length).toBe(5) -- Indices 7, 6, 5, 4, 3
+    end)
+
+    it("should return 0 for an empty or invalid slice [5:2] (positive step)", function()
+        local length = Utils.computeLenghtFromSlice(DIM, { start = 5, stop = 2, step = 1 })
+        expect(length).toBe(0)
+    end)
+
+    it("should return 0 for an empty slice [2:5:-1] (negative step)", function()
+        local length = Utils.computeLenghtFromSlice(DIM, { start = 2, stop = 5, step = -1 })
+        expect(length).toBe(0)
+    end)
+
+    it("should clamp out-of-bounds values on the right", function()
+        local slice = { start = 5, stop = 100 }::types.Slices
+        local length = Utils.computeLenghtFromSlice(DIM, slice)
+        expect(length).toBe(5) 
+        expect(slice.stop).toBe(10) 
+    end)
+
+    it("should clamp out-of-bounds values on the left (very negative indices)", function()
+        local slice = { start = -100, stop = 5 }::types.Slices
+        local length = Utils.computeLenghtFromSlice(DIM, slice)
+        expect(length).toBe(5) 
+        expect(slice.start).toBe(0)
+    end)
+
+end)

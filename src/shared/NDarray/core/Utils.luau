@@ -15,6 +15,7 @@
 ]=]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ErrorsMessages = require(script.Parent.ErrorsMessages)
 local types = require(ReplicatedStorage.Shared.NDarray.types)
 
 
@@ -179,6 +180,91 @@ function Utils.isContiguous(shape:{number},strides:{number}):boolean
     
     return true
 end
+
+
+--[=[
+    Normalizes a slice object by filling in default values and validating types.
+
+    Adapted directly from CPython's slice implementation (Objects/sliceobject.c).
+
+    Defaults logic:
+        • step: Defaults to 1.
+        • start: Defaults to 0 (step > 0) or math.huge (step < 0).
+        • stop: Defaults to math.huge (step > 0) or -math.huge (step < 0).
+
+    @param slice : The slice table containing optional start, stop, step.
+    @error TypeError : If any index is neither an integer nor nil.
+    @error ValueError : If step is zero.
+]=]
+function Utils.unpackSlice(slice:types.Slices)
+    if (slice.step == nil) then
+        slice.step = 1
+    else
+        if (type(slice.step) ~= "number" or slice.step % 1 ~= 0) then error(ErrorsMessages.Formatter("TypeError","Slice indices must be integers number or nil."),2) end
+        if (slice.step == 0) then error(ErrorsMessages.Formatter('ValueError',"Slice 'step' cannot be zero."),2) end
+    end
+    local step = slice.step :: number
+
+    if (slice.start == nil) then
+        slice.start = if (step < 0) then math.huge else 0
+    else
+        if (type(slice.start) ~= "number" or slice.start % 1 ~= 0) then error(ErrorsMessages.Formatter('TypeError',"Slice indices must be integers number or nil."),2) end
+    end
+
+    if (slice.stop == nil) then
+        slice.stop = if (step < 0) then -math.huge else math.huge
+    else
+        if (type(slice.stop) ~= "number" or slice.stop % 1 ~= 0) then error(ErrorsMessages.Formatter('TypeError',"Slice indices must be integers number or nil."),2) end
+    end
+
+end
+
+--[=[
+    Computes the resulting length of a sliced dimension.
+
+    Translates Python's canonical PySlice_GetIndicesEx indexing logic (Objects/sliceobject.c)
+    to calculate element count after normalizing negative bounds and step directions.
+
+    @param dim : Length of the target dimension.
+    @param _slice : Slice descriptor to evaluate.
+    @return number : Exact element count in the resulting slice.
+]=]
+function Utils.computeLenghtFromSlice(dim:number,_slice:types.Slices)
+    Utils.unpackSlice(_slice)
+    
+    local slice = _slice :: {start:number,stop:number,step:number}
+
+    if (slice.start < 0) then
+        slice.start = slice.start + dim
+        if (slice.start < 0) then
+            slice.start = if (slice.step < 0) then -1 else 0
+        end
+    elseif (slice.start >= dim) then
+        slice.start = if (slice.step < 0 ) then dim-1 else dim
+    end
+
+    if (slice.stop < 0) then
+        slice.stop = slice.stop + dim;
+        if (slice.stop < 0) then
+            slice.stop = if (slice.step < 0) then -1 else 0;
+        end
+    elseif (slice.stop >= dim) then
+        slice.stop = if (slice.step < 0) then dim - 1 else dim;
+    end
+
+    if (slice.step < 0) then
+        if (slice.stop < slice.start) then
+            return (slice.start - slice.stop - 1) // (-slice.step) + 1;
+        end
+    else 
+        if (slice.start < slice.stop) then
+            return (slice.stop - slice.start - 1) // slice.step + 1;
+        end
+    end
+
+    return 0
+end
+
 
 
 return Utils   
