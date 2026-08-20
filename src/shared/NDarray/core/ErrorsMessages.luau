@@ -61,4 +61,23 @@ function ErrorsMessages.StridesMismatch(expected:number,got:number):string
     return ErrorsMessages.Formatter("ValueError","Number of strides (%d) must match shape rank (%d).",got,expected)
 end
 
+
+function ErrorsMessages.ValueOutOfDTypeRange(value:number, dtype:number, min:number, max:number):string
+    return ErrorsMessages.Formatter(
+        "OverflowError","Value %g is out of range for dtype '%s'. Expected [%g, %g].",
+        value,
+        dtype,
+        min,
+        max
+    )
+end
+
+function ErrorsMessages.InvalidCoordinate(coordinate:{number},shape:{number})
+    return ErrorsMessages.Formatter(
+        "IndexError","Coordinate %s is incompatible with shape %s.",
+        tableToString(coordinate),
+        tableToString(shape)
+    )
+end
+
 return ErrorsMessages

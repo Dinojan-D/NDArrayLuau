@@ -43,9 +43,21 @@ local item_size = {{byte_size}}
 
 
 ---------------------------------------------------------------------------------------------------
+-- Seter & Geter
+---------------------------------------------------------------------------------------------------
+function Kernel.set(b:buffer, offset:number, value:number)
+    buffer_write{{dtype}}(b,offset,value)
+end
+
+function Kernel.get(b:buffer, offset:number):number
+    return buffer_read{{dtype}}(b,offset)
+end
+
+---------------------------------------------------------------------------------------------------
 -- Scalar Transformations
 ---------------------------------------------------------------------------------------------------
 {{ fill_methods[config.fillMethod]()}}
+
 
 ---------------------------------------------------------------------------------------------------
 -- Scalar Transformations By Math Operators
@@ -53,3 +65,6 @@ local item_size = {{byte_size}}
 {% for op_name, op_symbol in arithmetic_operators.items() %}
     {{ scalar_operators_engines[config.sOpMethods](dtype, op_name, op_symbol,item_size) }}
 {% endfor %}
+
+
+return Kernel

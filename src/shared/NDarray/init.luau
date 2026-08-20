@@ -22,6 +22,7 @@
 local DType = require(script.core.DType)
 local ErrorsMessages = require(script.core.ErrorsMessages)
 local Utils = require(script.core.Utils)
+local kernels = require(script.kernels)
 local types = require(script.types)
 
 
@@ -69,11 +70,12 @@ function NDarray._new(shape:{number},dtype:types.DtypeName,offsets:number?,buffe
     local expectedBytes = size * dtypeMetadata.itemSize
 
     if (buffer and buffer_len(buffer) ~= expectedBytes) then
-        error(ErrorsMessages.BufferMismatch(expectedBytes, buffer_len(buffer)))
+
+        error(ErrorsMessages.BufferMismatch(expectedBytes, buffer_len(buffer)),2)
     end
 
     if (strides and #strides ~= #shape) then
-        error(ErrorsMessages.StridesMismatch(#shape, #strides))
+        error(ErrorsMessages.StridesMismatch(#shape, #strides),2)
     end
 
     self.shape = shape
@@ -83,7 +85,7 @@ function NDarray._new(shape:{number},dtype:types.DtypeName,offsets:number?,buffe
     self.ndim = #shape
     self.dtypeMetadata = dtypeMetadata
     self.nbytes = expectedBytes
-    self._kernel = {}
+    self._kernel = kernels.GetKernel(dtype)
     self._buffer = buffer or create_buffer(self.nbytes)
     self.contiguous = Utils.isContiguous(self.shape, self.strides)
 
@@ -149,6 +151,107 @@ function NDarray.copy(ndarray:NDArray):NDArray
     buffer.copy(self._buffer,ndarray.offset,ndarray._buffer,ndarray.offset)
     return self
 end
+
+
+---------------------------------------------------------------------------------------------------
+-- Ndarray methods
+---------------------------------------------------------------------------------------------------
+--[=[
+    Fills the entire array with a constant value.
+
+    The value is validated against the current dtype range before being
+    written into the underlying buffer.
+
+    @param value : Value assigned to every element of the array.
+]=]
+function NDarray:fill(value:number)
+    local max,min = self.dtypeMetadata.maxNumber,self.dtypeMetadata.minNumber
+
+    if (value < min or value > max) then
+        error(ErrorsMessages.ValueOutOfDTypeRange(value, self.dtypeMetadata.name, min, max),2)
+    end
+
+    self._kernel.fill(self._buffer, self.offset, value)
+end
+
+--[=[
+    Returns the value stored at a given coordinate.
+
+    The coordinate must match the number of dimensions of the array and
+    each index must be within the corresponding dimension bounds.
+
+    Example:
+        shape = {3, 4}
+
+        array:getElement({1, 2})
+        accesses the element at row 1, column 2.
+
+    @param coordinate : N-dimensional coordinate of the element (0-indexing).
+    @return number : Value stored at the given coordinate.
+]=]
+function NDarray:getElement(coordinate:{number}):number
+    if (not Utils.isValidCoordinate(coordinate, self.shape)) then
+        error(ErrorsMessages.InvalidCoordinate(coordinate, self.shape),2)
+    end
+
+    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides)
+    return self._kernel.get(self._buffer,index1D)
+end
+
+--[=[
+    Sets the value at a given coordinate.
+
+    The coordinate must match the number of dimensions of the array and
+    each index must be within the corresponding dimension bounds.
+
+    The assigned value must be representable by the array dtype.
+
+    Example:
+        shape = {3, 4}
+
+        array:setElement({1, 2}, 42)
+
+    @param coordinate : N-dimensional coordinate of the element (0-indexing).
+    @param value : New value assigned to the element.
+]=]
+function NDarray:setElement(coordinate:{number},value:number)
+    local max,min = self.dtypeMetadata.maxNumber,self.dtypeMetadata.minNumber
+
+    if (value < min or value > max) then
+        error(ErrorsMessages.ValueOutOfDTypeRange(value, self.dtypeMetadata.name, min, max),2)
+    end
+
+    if (not Utils.isValidCoordinate(coordinate, self.shape)) then
+        error(ErrorsMessages.InvalidCoordinate(coordinate, self.shape),2)
+    end
+
+    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides)
+
+    return self._kernel.set(self._buffer, index1D, value)
+end
+
+--[=[
+    Returns a view of the array with axes transposed.
+
+    The returned NDArray shares the same underlying buffer as the original. 
+    The shape and strides are reversed, effectively swapping dimensions. 
+    This is a O(N) (N is dimension of this array) operation as no data is copied.
+
+    @return NDArray : A new view of the array with transposed dimensions.
+]=]
+function NDarray:transpose(): NDArray
+    local newShape = {}
+    local newStrides = {}
+
+    for i = self.ndim, 1, -1 do
+        table.insert(newShape, self.shape[i])
+        table.insert(newStrides, self.strides[i])
+    end
+    local view = NDarray._new(newShape, self.dtypeMetadata.name,self.offset,self._buffer,newStrides)
+    
+    return view 
+end
+
 
 export type NDArray = typeof(setmetatable({}::types.ndarray,NDarray))
 return NDarray

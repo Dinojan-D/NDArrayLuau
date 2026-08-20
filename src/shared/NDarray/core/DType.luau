@@ -1,3 +1,4 @@
+--!strict
 --[=[
     ===============================================================================
                                     DType Module
@@ -26,9 +27,6 @@ local types = require(script.Parent.Parent.types)
 ]=]
 local DType = {}
 
---[=[
-    Enumeration of all data types supported by NDArray.
-]=]
 DType.Enum = {
     i8 = "i8",
     u8 = "u8",
@@ -37,21 +35,17 @@ DType.Enum = {
     i32 = "i32",
     u32 = "u32",
     f32 = "f32",
-    f64 = "f64"
-} :: {[string]: types.DtypeName}
+    f64 = "f64",
+} :: { [string]: types.DtypeName }
 
---[=[
-    PRIVATE USE
 
-    Immutable metadata describing each supported data type.
-]=]
-DType._Metadata = {
+local metadata: { [types.DtypeName]: types.DtypeMetadata } = {
     i8 = {
         name = "i8",
         itemSize = 1,
         maxNumber = 127,
         minNumber = -128,
-        valueType = "signed"
+        valueType = "signed",
     },
 
     u8 = {
@@ -59,15 +53,15 @@ DType._Metadata = {
         itemSize = 1,
         maxNumber = 255,
         minNumber = 0,
-        valueType = "unsigned"
+        valueType = "unsigned",
     },
 
     i16 = {
         name = "i16",
         itemSize = 2,
         maxNumber = 32767,
-        valueType = "signed"
-        
+        minNumber = -32768, 
+        valueType = "signed",
     },
 
     u16 = {
@@ -75,7 +69,7 @@ DType._Metadata = {
         itemSize = 2,
         maxNumber = 65535,
         minNumber = 0,
-        valueType = "unsigned"
+        valueType = "unsigned",
     },
 
     i32 = {
@@ -83,7 +77,7 @@ DType._Metadata = {
         itemSize = 4,
         maxNumber = 2147483647,
         minNumber = -2147483648,
-        valueType = "signed"
+        valueType = "signed",
     },
 
     u32 = {
@@ -91,26 +85,27 @@ DType._Metadata = {
         itemSize = 4,
         maxNumber = 4294967295,
         minNumber = 0,
-        valueType = "unsigned"
+        valueType = "unsigned",
     },
 
     f32 = {
         name = "f32",
         itemSize = 4,
-        maxNumber = 3.402823466e+38,
-        minNumber = -3.402823466e+38,
-        valueType = "float"
+        maxNumber = math.huge,
+        minNumber = -math.huge,
+        valueType = "float",
     },
 
     f64 = {
         name = "f64",
         itemSize = 8,
-        maxNumber = 1.7976931348623157e+308,
-        minNumber = -1.7976931348623157e+308,
-        valueType = "float"
-    }
+        maxNumber = math.huge,
+        minNumber = -math.huge,
+        valueType = "float",
+    },
+}
 
-}::{[types.DtypeName]: types.DtypeMetadata}
+DType._Metadata = metadata
 
 table.freeze(DType._Metadata)
 for _, object in pairs(DType._Metadata) do

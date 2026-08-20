@@ -50,7 +50,7 @@ export type ndarray = {
 --[=[
     A union type representing the supported data types for NDArray elements.
 ]=]
-export type DtypeName = "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "f16" | "f32" | "f64"
+export type DtypeName = "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "f32" | "f64"
 
 --[=[
     A union type representing the supported sign and representation categories for dtypes.
@@ -77,7 +77,7 @@ export type DtypeMetadata = {
     minNumber: number,
 
     -- The sign and representation category of the data type.
-    valueType:("unsigned" | "signed" | "float")
+    valueType:DTypeValueType
 }
 
 --[=[
@@ -121,7 +121,7 @@ export type Kernel = {
     set:(b:buffer, offset:number, value:number) -> (),
 
     -- Gets the value at the given index in the buffer.
-    get:(b:buffer, offset:number) -> (number),
+    get:(b:buffer, offset:number) -> number,
 
 ---{Arithmetic scalar operators}------------------------------------------------------------------------------------------------
     -- Adds a scalar to each element.
