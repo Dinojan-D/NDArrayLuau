@@ -1,13 +1,13 @@
 {% macro native(dtype,item_size) %}
 local buffer_fill = buffer.fill
-function Kernel.fill(b: buffer, offset: number, value: number, count: number?)
+function Kernel.fill(b: buffer, offset: number, value: number, count: number)
     buffer_fill(b,offset,value,count)
 end 
 {% endmacro %}
 
 {%macro classic(dtype,item_size)%}
-function Kernel.fill(b: buffer, offset: number, scalar: number, count: number?)
-    local _size = if count then offset+count*item_size else buffer_len(b)
+function Kernel.fill(b: buffer, offset: number, scalar: number, count: number)
+    local _size = offset+count*item_size
     _size -=1
     
     for pointer = offset, _size,item_size do

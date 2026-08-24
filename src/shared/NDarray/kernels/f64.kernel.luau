@@ -7,7 +7,7 @@
 
     Recommanded to only add dirrective native command (@native or --!native).
 
-    date:2026-08-23 14:07
+    date:2026-08-24 11:12
 ]=]
 
 --[=[
@@ -54,8 +54,8 @@ end
 -- Scalar Transformations
 ---------------------------------------------------------------------------------------------------
 
-function Kernel.fill(b: buffer, offset: number, scalar: number, count: number?)
-    local _size = if count then offset+count*item_size else buffer_len(b)
+function Kernel.fill(b: buffer, offset: number, scalar: number, count: number)
+    local _size = offset+count*item_size
     _size -=1
 
     for pointer = offset, _size,item_size do
@@ -67,8 +67,8 @@ end
 -- Scalar Transformations By Math Operators
 ---------------------------------------------------------------------------------------------------
 
-function Kernel.addS(b: buffer, offset: number, scalar: number, count: number?)
-    local _size = if count then offset+count*item_size else buffer_len(b)
+function Kernel.addS(b: buffer, offset: number, scalar: number, count: number)
+    local _size = offset+count*item_size
     _size -=1
 
     for pointer = offset, _size,item_size do
@@ -76,8 +76,8 @@ function Kernel.addS(b: buffer, offset: number, scalar: number, count: number?)
     end
 end
 
-function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number?)
-    local _size = if count then offset+count*item_size else buffer_len(b)
+function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number)
+    local _size = offset+count*item_size
     _size -=1
 
     for pointer = offset, _size,item_size do
@@ -85,8 +85,8 @@ function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number?)
     end
 end
 
-function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number?)
-    local _size = if count then offset+count*item_size else buffer_len(b)
+function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number)
+    local _size = offset+count*item_size
     _size -=1
 
     for pointer = offset, _size,item_size do
@@ -94,8 +94,8 @@ function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number?)
     end
 end
 
-function Kernel.modS(b: buffer, offset: number, scalar: number, count: number?)
-    local _size = if count then offset+count*item_size else buffer_len(b)
+function Kernel.modS(b: buffer, offset: number, scalar: number, count: number)
+    local _size = offset+count*item_size
     _size -=1
 
     for pointer = offset, _size,item_size do
@@ -103,8 +103,8 @@ function Kernel.modS(b: buffer, offset: number, scalar: number, count: number?)
     end
 end
 
-function Kernel.powS(b: buffer, offset: number, scalar: number, count: number?)
-    local _size = if count then offset+count*item_size else buffer_len(b)
+function Kernel.powS(b: buffer, offset: number, scalar: number, count: number)
+    local _size = offset+count*item_size
     _size -=1
 
     for pointer = offset, _size,item_size do
