@@ -1,3 +1,3 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-require(ReplicatedStorage.tests.tests_runner)("api",{})
+require(ReplicatedStorage.tests.tests_runner)("api",{verbose=true})

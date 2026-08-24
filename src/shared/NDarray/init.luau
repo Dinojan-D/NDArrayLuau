@@ -168,10 +168,10 @@ function NDarray:fill(value:number)
     local max,min = self.dtypeMetadata.maxNumber,self.dtypeMetadata.minNumber
 
     if (value < min or value > max) then
-        error(ErrorsMessages.ValueOutOfDTypeRange(value, self.dtypeMetadata.name, min, max),2)
+        error(ErrorsMessages.ValueOutOfDTypeRange(value, self.dtypeMetadata.name, min, max,self.dtypeMetadata.valueType),2)
     end
 
-    self._kernel.fill(self._buffer, self.offset, value)
+    self._kernel.fill(self._buffer, self.offset, value, self.size)
 end
 
 --[=[
@@ -218,7 +218,7 @@ function NDarray:setElement(coordinate:{number},value:number)
     local max,min = self.dtypeMetadata.maxNumber,self.dtypeMetadata.minNumber
 
     if (value < min or value > max) then
-        error(ErrorsMessages.ValueOutOfDTypeRange(value, self.dtypeMetadata.name, min, max),2)
+        error(ErrorsMessages.ValueOutOfDTypeRange(value, self.dtypeMetadata.name, min, max,self.dtypeMetadata.valueType),2)
     end
 
     if (not Utils.isValidCoordinate(coordinate, self.shape)) then
@@ -251,6 +251,163 @@ function NDarray:transpose(): NDArray
     
     return view 
 end
+
+
+---------------------------------------------------------------------------------------------------
+-- In-Place Operators  (Mutable) like +=, -=, *=, /=, //=, ^=, %=
+---------------------------------------------------------------------------------------------------
+
+function NDarray:_scalarInPlace(scalar:number,operation:"add" | "mul" | "div" | "idiv" | "mod" | "pow")
+    local max,min = self.dtypeMetadata.maxNumber,self.dtypeMetadata.minNumber
+
+    if (scalar < min or scalar > max) then
+        error(ErrorsMessages.ValueOutOfDTypeRange(scalar, self.dtypeMetadata.name, min, max,self.dtypeMetadata.valueType),2)
+    end
+
+    if (self.dtypeMetadata.valueType  ~= "float" and operation == "div") then
+        operation = "idiv"
+    end
+
+    if ((operation == "idiv" or operation == "div" or operation == "mod") and scalar == 0 ) then
+        error(ErrorsMessages.ZeroDivisionError(),2)
+    end
+
+    if (operation == "add") then
+        self._kernel.addS(self._buffer, self.offset, scalar,self.size)
+    elseif (operation == "mul") then
+        self._kernel.mulS(self._buffer, self.offset, scalar,self.size)
+    elseif (operation == "div") then
+        self._kernel.mulS(self._buffer, self.offset, 1/scalar,self.size)
+    elseif (operation == "idiv") then
+        self._kernel.idivS(self._buffer, self.offset, scalar,self.size)
+    elseif (operation == "mod") then
+        self._kernel.modS(self._buffer, self.offset,scalar,self.size)
+    elseif (operation == "pow") then
+        self._kernel.powS(self._buffer, self.offset,scalar,self.size)
+    else
+        --DEV Error (in normal case)
+        error(ErrorsMessages.Formatter("SyntaxError", "Unsupported operands for %s.", operation),2)
+    end
+end
+
+
+--[=[
+    Adds a scalar or another NDArray to this array in-place.
+
+    If an NDArray is provided, both arrays must have the same shape.
+
+    @param scalar : A scalar value or an NDArray.
+    @return ndarray : This NDArray.
+]=]
+function NDarray:iadd(scalar:number|NDArray):NDArray
+    if typeof(scalar) == "number" then
+        self:_scalarInPlace(scalar,"add")
+    end
+
+    
+    return self
+end
+
+--[=[
+    Subtracts a scalar or another NDArray to this array in-place.
+
+    If an NDArray is provided, both arrays must have the same shape.
+
+    @param scalar : A scalar value or an NDArray.
+    @return ndarray : This NDArray.
+]=]
+function NDarray:isub(scalar:number|NDArray):NDArray
+    if typeof(scalar) == "number" then
+        self:_scalarInPlace(-scalar,"add")
+    end
+
+    return self
+end
+
+--[=[
+    Multiplies this array by a scalar or another NDArray in-place.
+
+    If an NDArray is provided, both arrays must have the same shape.
+
+    @param scalar : A scalar value or an NDArray.
+    @return ndarray : This NDArray.
+]=]
+function NDarray:imul(scalar:number|NDArray):NDArray
+    if typeof(scalar) == "number" then
+        self:_scalarInPlace(scalar,"mul")
+    end
+
+    
+    return self
+end
+
+--[=[
+    Divides this array by a scalar or another NDArray in-place.
+
+    If an NDArray is provided, both arrays must have the same shape.
+
+    @param scalar : A scalar value or an NDArray.
+    @return ndarray : This NDArray.
+]=]
+function NDarray:idiv(scalar:number|NDArray):NDArray
+    if typeof(scalar) == "number" then
+        self:_scalarInPlace(scalar,"div") 
+    end
+    
+    return self
+end
+
+--[=[
+    Performs floor division on this array in-place.
+
+    If an NDArray is provided, both arrays must have the same shape.
+
+    @param scalar : A scalar value or an NDArray.
+    @return ndarray : This NDArray.
+]=]
+function NDarray:iidiv(scalar:number|NDArray):NDArray
+    if typeof(scalar) == "number" then
+        self:_scalarInPlace(scalar,"idiv")
+    end
+
+    
+    return self
+end
+
+--[=[
+    Raises every element of this array to the given power in-place.
+
+    If an NDArray is provided, both arrays must have the same shape.
+
+    @param scalar : A scalar value or an NDArray.
+    @return ndarray : This NDArray.
+]=]
+function NDarray:ipow(scalar:number|NDArray):NDArray
+    if typeof(scalar) == "number" then
+        self:_scalarInPlace(scalar,"pow")
+    end
+
+    
+    return self
+end
+
+--[=[
+    Computes the modulo of this array in-place.
+
+    If an NDArray is provided, both arrays must have the same shape.
+
+    @param scalar : A scalar value or an NDArray.
+    @return ndarray : This NDArray.
+]=]
+function NDarray:imod(scalar:number|NDArray):NDArray
+    if typeof(scalar) == "number" then
+        self:_scalarInPlace(scalar,"mod")
+    end
+
+    
+    return self
+end
+
 
 
 export type NDArray = typeof(setmetatable({}::types.ndarray,NDarray))

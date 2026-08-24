@@ -1,3 +1,5 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local types = require(ReplicatedStorage.Shared.NDarray.types)
 --[=[
     ===============================================================================
                                     Errors Messages Module
@@ -62,13 +64,14 @@ function ErrorsMessages.StridesMismatch(expected:number,got:number):string
 end
 
 
-function ErrorsMessages.ValueOutOfDTypeRange(value:number, dtype:number, min:number, max:number):string
+function ErrorsMessages.ValueOutOfDTypeRange(value:number, dtype:number, min:number, max:number, numberType:types.DTypeValueType):string
     return ErrorsMessages.Formatter(
-        "OverflowError","Value %g is out of range for dtype '%s'. Expected [%g, %g].",
+        "OverflowError","Value %g is out of range for dtype '%s'. Expected [%g, %g] %s.",
         value,
         dtype,
         min,
-        max
+        max,
+        numberType
     )
 end
 
@@ -78,6 +81,10 @@ function ErrorsMessages.InvalidCoordinate(coordinate:{number},shape:{number})
         tableToString(coordinate),
         tableToString(shape)
     )
+end
+
+function ErrorsMessages.ZeroDivisionError()
+    return ErrorsMessages.Formatter("ZeroDivisionError","a division by zero!")
 end
 
 return ErrorsMessages

@@ -19,7 +19,8 @@
             "fillMethod": {
                 "type": "string",
                 "enum": [
-                    "native"
+                    "native",
+                    "classic"
                 ]
             },
             "sOpMethods": {

@@ -8,5 +8,10 @@
         "fillMethod": "native",
         "sOpMethods": "classic",
         "bOpMethods": "classic"
+    },
+    "f64": {
+        "fillMethod": "classic",
+        "sOpMethods": "classic",
+        "bOpMethods": "classic"
     }
 }

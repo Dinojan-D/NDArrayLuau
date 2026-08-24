@@ -54,6 +54,8 @@ export type DtypeName = "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "f32" | "f
 
 --[=[
     A union type representing the supported sign and representation categories for dtypes.
+
+    float-> f32 & f64
 ]=]
 export type DTypeValueType = "unsigned" | "signed" | "float"
 
