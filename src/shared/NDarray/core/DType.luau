@@ -15,6 +15,7 @@
 ]=]
 
 local types = require(script.Parent.Parent.types)
+local Utils = require(script.Parent.Utils)
 
 --[=[
     Provides metadata and utilities for the numerical data types supported
@@ -123,6 +124,29 @@ table.freeze(DType.Enum)
 ]=]
 function DType.getDtypeMetadata(dtype:types.DtypeName):types.DtypeMetadata
     return DType._Metadata[dtype]
+end
+
+--[=[
+    Returns the dtype caster associated with this data type.
+
+    The returned object is a function that cast the given number value, using Utils.castI & Utils.castU.
+
+    @param dtype : Data type (e.g. DType.Enum.i8).
+    @return (number)->number : a function that cast the given number value 
+]=]
+function DType.getCaster(dtype:types.DtypeName):(number)->number
+    local meta = DType.getDtypeMetadata(dtype)
+    local valueType = meta.valueType
+    local bits = meta.itemSize * 8
+
+    if valueType == "signed" then
+        return function (a:number) return Utils.castI(bits, a) end
+    end
+    if  valueType == "unsigned" then
+        return function (a:number) return Utils.castU(bits, a) end
+    end
+
+    return function (a:number) return a end
 end
 
 return DType

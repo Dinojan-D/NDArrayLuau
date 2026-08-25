@@ -1,9 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local JestGlobals = require(ReplicatedStorage.DevPackages.JestGlobals)
+local DType = require(ReplicatedStorage.Shared.NDarray.core.DType)
 local kernels = require(ReplicatedStorage.Shared.NDarray.kernels)
 local types = require(ReplicatedStorage.Shared.NDarray.types)
 
 local jest = JestGlobals.jest
+
+
 
 local KernelContexts = {}
 function KernelContexts.mockedKernel(dtype: types.DtypeName): types.Kernel
@@ -21,6 +24,21 @@ function KernelContexts.mockedKernel(dtype: types.DtypeName): types.Kernel
         powS = jest.fn(realKernel.powS),
     } :: any
 end
+
+export type KernelDescprition = {
+    name: types.DtypeName,
+}
+
+function KernelContexts.getAvaiablesKernels(): { { name: types.DtypeName } }
+    local availableDtypes = {}
+    
+    for dtype, _ in pairs(kernels._kernelRegistry) do
+        table.insert(availableDtypes, { name = dtype })
+    end
+    
+    return availableDtypes
+end
+
 
 
 

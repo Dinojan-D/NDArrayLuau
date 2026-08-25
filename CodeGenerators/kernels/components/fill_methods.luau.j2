@@ -8,7 +8,7 @@ end
 {%macro classic(dtype,item_size)%}
 function Kernel.fill(b: buffer, offset: number, scalar: number, count: number)
     local _size = offset+count*item_size
-    _size -=1
+    _size -=item_size
     
     for pointer = offset, _size,item_size do
         buffer_write{{dtype}}(b, pointer,scalar)        

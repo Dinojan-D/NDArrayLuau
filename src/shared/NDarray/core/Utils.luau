@@ -265,6 +265,67 @@ function Utils.computeLenghtFromSlice(dim:number,_slice:types.Slices)
     return 0
 end
 
+--[=[
+    PRIVATE USE
 
+    Casts a numeric value to an unsigned integer constrained to the specified 
+    bit-width. 
+
+    Handles overflow using wrap-around logic (modulo arithmetic). Special 
+    floating-point values (NaN, infinity) are clamped to the range boundaries.
+
+    @param bits : Number of bits (e.g., 8, 16, 32). Must be strictly positive.
+    @param value : The numeric value to cast.
+    @return number : The resulting unsigned integer within the [0, 2^bits - 1] range.
+]=]
+function Utils.castU(bits:number,value:number):number
+  
+    assert(bits>0,"bits are strictly positive." )
+    
+    if (value ~= value) then return 0 end
+    
+    if value == -math.huge then return 0 end
+    if (value == math.huge) then return (2 ^ bits) -1 end
+    
+
+    local int,_ = math.modf(value % (2 ^ bits))
+    if (int==0) then int=0 end
+    return int
+end
+
+--[=[
+    PRIVATE USE
+
+    Casts a numeric value to a signed integer constrained to the specified 
+    bit-width, using two's complement representation.
+
+    Handles overflow using wrap-around logic. Special floating-point values 
+    (NaN, infinity) are mapped to 0 or -1 based on convention.
+
+    @param bits : Number of bits (e.g., 8, 16, 32). Must be strictly positive.
+    @param value : The numeric value to cast.
+    @return number : The resulting signed integer within the [-2^(bits-1), 2^(bits-1) - 1] range.
+]=]
+function Utils.castI(bits:number,value:number)
+    assert(bits>0,"bits are strictly positive." )
+
+    if (value ~= value ) then return 0 end 
+    
+    if (value == -math.huge) then return 0 end
+    if (value == math.huge) then return -1 end
+
+    local max = 2^bits
+    value = value % max
+  
+    if value >= max/2 then  
+      local int,_ = math.modf(value - max) 
+       if (int==0) then int=0 end
+      return int
+    end
+    
+    local int,_ = math.modf(value//1)
+    if (int==0) then int=0 end
+    return int
+end
 
 return Utils   
