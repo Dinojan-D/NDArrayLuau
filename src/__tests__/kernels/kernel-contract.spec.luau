@@ -151,5 +151,63 @@ describe.each(KernelContexts.getAvaiablesKernels())("Kernel contract: $name", fu
                 expect(received).toBe(cast(item.compute(cast(defaultValue), transValue)))
             end
         end)
+        describe("strided operation (step parameter)", function()
+            it("should mutate elements at regular intervals starting from index 0 (step = 2)", function()
+                local defaultValue = 3
+                KernelOracle.fillBuffer(b, kernelInfo.name, defaultValue)
+
+                local transValue = 5
+                local offset = 0
+                local count = 4
+                local step = 2
+
+                kernel[item.name](b, offset, transValue, count, step)
+
+                local expectedTouchedIndices = {}
+                for i = 0, count//step - 1 do
+                    local touchedElemIndex =offset + (itemSize*step*i)
+                    expectedTouchedIndices[touchedElemIndex] = true
+                end
+
+                for pointer = 0, bufferSize-itemSize,itemSize do
+                    local received = kernel.get(b, pointer)
+
+                    if expectedTouchedIndices[pointer] then
+                        expect(received).toBe(cast(item.compute(cast(defaultValue), transValue)))
+                    else
+                        expect(received).toBe(defaultValue)
+                    end
+                end
+            end)
+
+            it("should handle non-zero offset combined with step > 1 (offset = 1, step = 3)", function()
+                local defaultValue = 3
+                KernelOracle.fillBuffer(b, kernelInfo.name, defaultValue)
+
+                local transValue = 5
+                local startElem = 1
+                local offset = startElem * itemSize
+                local count = 3
+                local step = 3
+
+                kernel[item.name](b, offset, transValue, count, step)
+
+                local expectedTouchedIndices = {}
+                for i = 0, count//step - 1 do
+                    local touchedElemIndex =offset + (itemSize*step*i)
+                    expectedTouchedIndices[touchedElemIndex] = true
+                end
+
+                for pointer = 0, bufferSize-itemSize,itemSize do
+                    local received = kernel.get(b, pointer)
+
+                    if expectedTouchedIndices[pointer] then
+                        expect(received).toBe(cast(item.compute(cast(defaultValue), transValue)))
+                    else
+                        expect(received).toBe(defaultValue)
+                    end
+                end
+            end)
+end)
     end)
 end)
