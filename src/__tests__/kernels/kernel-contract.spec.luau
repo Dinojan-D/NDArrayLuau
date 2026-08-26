@@ -1,9 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local JestGlobals = require(ReplicatedStorage.DevPackages.JestGlobals)
-local NDarray = require(ReplicatedStorage.Shared.NDarray)
 local DType = require(ReplicatedStorage.Shared.NDarray.core.DType)
-local ErrorsMessages = require(ReplicatedStorage.Shared.NDarray.core.ErrorsMessages)
-local Utils = require(ReplicatedStorage.Shared.NDarray.core.Utils)
 local types = require(ReplicatedStorage.Shared.NDarray.types)
 local KernelContexts = require(ReplicatedStorage.tests.contexts.KernelContexts)
 local KernelOracle = require(ReplicatedStorage.tests.contexts.KernelOracle)
@@ -13,18 +10,7 @@ local it = JestGlobals.it
 local expect = JestGlobals.expect
 local beforeEach = JestGlobals.beforeEach
 
-local function castValue(meta: types.DtypeMetadata, value: number): number
-    local bitSize = meta.itemSize * 8
 
-    if meta.valueType == "signed" then
-        return Utils.castI(bitSize, value)
-    elseif meta.valueType == "unsigned" then
-        return Utils.castU(bitSize, value)
-    end
-
-    -- Pour "float" (f32/f64), pas de wrap-around binaire
-    return value
-end
 
 describe.each(KernelContexts.getAvaiablesKernels())("Kernel contract: $name", function(kernelInfo: KernelContexts.KernelDescprition)
     local metaDtype = DType.getDtypeMetadata(kernelInfo.name)
@@ -164,7 +150,7 @@ describe.each(KernelContexts.getAvaiablesKernels())("Kernel contract: $name", fu
                 kernel[item.name](b, offset, transValue, count, step)
 
                 local expectedTouchedIndices = {}
-                for i = 0, count//step - 1 do
+                for i = 0, (count-1)//step do
                     local touchedElemIndex =offset + (itemSize*step*i)
                     expectedTouchedIndices[touchedElemIndex] = true
                 end
@@ -193,7 +179,7 @@ describe.each(KernelContexts.getAvaiablesKernels())("Kernel contract: $name", fu
                 kernel[item.name](b, offset, transValue, count, step)
 
                 local expectedTouchedIndices = {}
-                for i = 0, count//step - 1 do
+                for i = 0, (count-1)//step do
                     local touchedElemIndex =offset + (itemSize*step*i)
                     expectedTouchedIndices[touchedElemIndex] = true
                 end
