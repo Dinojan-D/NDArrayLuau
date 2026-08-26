@@ -342,6 +342,57 @@ describe("NDarray contract test : general ",function()
         end)
     end)
 
+    describe(":_operationOutOfPlace (NDArray op scalar)", function()
+        local operations = {"add", "sub", "mul", "div", "idiv", "mod", "pow"}
+
+        describe.each(operations)("operation '%s'", function(operation)
+            it(`should return a copy and delegate to _scalarInPlace for {operation}`, function()
+                local array = NDarray.zeros({2, 2}, DEFAULT_DTYPE)
+                
+                local originalCopy = NDarray.copy
+                local resultCopy = nil
+                
+                
+                local scalarInPlaceCalled = false
+                local receivedScalar = nil
+                local receivedOperation = nil
+
+                
+                NDarray.copy = function(arr)
+                    local copy = originalCopy(arr)
+                    resultCopy = copy
+                    
+                    
+                    copy._scalarInPlace = function(self, scalar, op)
+                        scalarInPlaceCalled = true
+                        receivedScalar = scalar
+                        receivedOperation = op
+                    end
+                    
+                    return copy
+                end
+
+                local inputScalar = 42
+                
+                
+                local result = NDarray._operationOutOfPlace(array, inputScalar, operation)
+                
+                
+                expect(result).toBe(resultCopy)
+                expect(result).never.toBe(array) 
+                expect(result._buffer).never.toBe(array._buffer) 
+
+                
+                expect(scalarInPlaceCalled).toBe(true)
+                expect(receivedScalar).toBe(inputScalar)
+                expect(receivedOperation).toBe(operation)
+                
+            
+                NDarray.copy = originalCopy
+            end)
+        end)
+    end)
+
 end)
 
 

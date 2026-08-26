@@ -257,7 +257,7 @@ end
 -- In-Place Operators  (Mutable) like +=, -=, *=, /=, //=, ^=, %=
 ---------------------------------------------------------------------------------------------------
 
-function NDarray:_scalarInPlace(scalar:number,operation:"add" | "mul" | "div" | "idiv" | "mod" | "pow")
+function NDarray:_scalarInPlace(scalar:number,operation:"add" | "sub" | "mul" | "div" | "idiv" | "mod" | "pow")
     local max,min = self.dtypeMetadata.maxNumber,self.dtypeMetadata.minNumber
 
     if (scalar < min or scalar > max) then
@@ -274,6 +274,8 @@ function NDarray:_scalarInPlace(scalar:number,operation:"add" | "mul" | "div" | 
 
     if (operation == "add") then
         self._kernel.addS(self._buffer, self.offset, scalar,self.size)
+    elseif (operation == "sub") then
+        self._kernel.addS(self._buffer, self.offset, -scalar,self.size)
     elseif (operation == "mul") then
         self._kernel.mulS(self._buffer, self.offset, scalar,self.size)
     elseif (operation == "div") then
@@ -304,7 +306,6 @@ function NDarray:iadd(scalar:number|NDArray):NDArray
         self:_scalarInPlace(scalar,"add")
     end
 
-    
     return self
 end
 
@@ -318,7 +319,7 @@ end
 ]=]
 function NDarray:isub(scalar:number|NDArray):NDArray
     if typeof(scalar) == "number" then
-        self:_scalarInPlace(-scalar,"add")
+        self:_scalarInPlace(scalar,"sub")
     end
 
     return self
@@ -406,6 +407,64 @@ function NDarray:imod(scalar:number|NDArray):NDArray
 
     
     return self
+end
+
+---------------------------------------------------------------------------------------------------
+-- Out-of-place operator (Immutable) like B = A + B, B = A - B, B = A * B, B = A / B, B = A // B, B = A ^ B, B = A % B
+---------------------------------------------------------------------------------------------------
+function NDarray._operationOutOfPlace(left:any, right:any, operation:"add" | "sub" | "mul" | "div" | "idiv" | "mod" | "pow"): NDArray
+    -- NDArray op scalar
+    if getmetatable(left) == NDarray and typeof(right) == "number" then
+        local copy = NDarray.copy(left)
+        copy:_scalarInPlace(right,operation)
+
+        return copy
+    end
+
+    -- scalar op NDArray
+    if typeof(left) == "number" and getmetatable(right) == NDarray then
+        error(ErrorsMessages.Formatter("SyntaxError","Scalar %s NDArray is not implemented yet.",operation ),2)
+    end
+
+    -- NDArray op NDArray
+    if getmetatable(left::any) == NDarray and getmetatable(right) == NDarray then
+        error(ErrorsMessages.Formatter("SyntaxError","NDArray %s NDArray is not implemented yet.",operation),2)
+    end
+
+    --DEV Error (in normal case)
+    error(ErrorsMessages.Formatter("SyntaxError", "Unsupported operands for %s.", operation),2)
+end
+
+function NDarray.__add(left:any, right:any)
+    return NDarray._operationOutOfPlace(left, right, "add")
+end
+
+function NDarray.__sub(left:any, right:any)
+    return NDarray._operationOutOfPlace(left, right, "sub")
+end
+
+function NDarray.__mul(left:any, right:any)
+    return NDarray._operationOutOfPlace(left, right, "mul")
+end
+
+
+function NDarray.__div(left:any, right:any)
+    return NDarray._operationOutOfPlace(left, right, "div")
+end
+
+
+function NDarray.__idiv(left:any, right:any)
+    return NDarray._operationOutOfPlace(left, right, "idiv")
+end
+
+
+function NDarray.__pow(left:any, right:any)
+    return NDarray._operationOutOfPlace(left, right, "pow")
+end
+
+
+function NDarray.__mod(left:any, right:any)
+    return NDarray._operationOutOfPlace(left, right, "mod")
 end
 
 

@@ -92,3 +92,53 @@ describe("NDarray contract test : InPlace Scalar operators", function()
     end)
 
 end)
+
+type MetamethodMapping = {
+    metamethod: string,
+    operation: string
+}
+
+local MetamethodsDispatch: {MetamethodMapping} = {
+    {metamethod = "__add",  operation = "add"},
+    {metamethod = "__sub",  operation = "sub"},
+    {metamethod = "__mul",  operation = "mul"},
+    {metamethod = "__div",  operation = "div"},
+    {metamethod = "__idiv", operation = "idiv"},
+    {metamethod = "__mod",  operation = "mod"},
+    {metamethod = "__pow",  operation = "pow"},
+}
+
+describe("NDarray contract test : Out-Place Scalar operators", function()
+    describe.each(MetamethodsDispatch)(".$metamethod()", function(mapping: MetamethodMapping)
+        it(`should delegate to _operationOutOfPlace with '{mapping.operation}'`, function()
+            local array = NDarray.zeros({2, 2}, DEFAULT_DTYPE)
+            local inputScalar = 10
+            
+            local called = false
+            local receivedLeft, receivedRight, receivedOp = nil, nil, nil
+            local fakeResult = {} :: any 
+            
+            local originalOutOfPlace = NDarray._operationOutOfPlace
+           
+            NDarray._operationOutOfPlace = function(left, right, operation)
+                called = true
+                receivedLeft = left
+                receivedRight = right
+                receivedOp = operation
+                return fakeResult 
+            end
+
+            local result = NDarray[mapping.metamethod](array, inputScalar)
+            
+            expect(called).toBe(true)
+            expect(receivedLeft).toBe(array)
+            expect(receivedRight).toBe(inputScalar)
+            expect(receivedOp).toBe(mapping.operation)
+           
+            expect(result).toBe(fakeResult)
+            
+            NDarray._operationOutOfPlace = originalOutOfPlace
+        end)
+    end)
+end)
+
