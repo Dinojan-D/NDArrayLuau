@@ -7,7 +7,7 @@
 
     Recommanded to only add dirrective native command (@native or --!native).
 
-    date:2026-08-26 13:13
+    date:2026-08-27 10:44
 ]=]
 
 --[=[
@@ -25,14 +25,6 @@
 local types = require(script.Parent.Parent.types)
 
 ---------------------------------------------------------------------------------------------------
--- Functions Localization
----------------------------------------------------------------------------------------------------
-
-local buffer_len = buffer.len
-local buffer_readi8 = buffer.readi8
-local buffer_writei8 = buffer.writei8
-
----------------------------------------------------------------------------------------------------
 
 local Kernel = {}::types.Kernel
 
@@ -43,11 +35,11 @@ local item_size = 1
 -- Seter & Geter
 ---------------------------------------------------------------------------------------------------
 function Kernel.set(b:buffer, offset:number, value:number)
-    buffer_writei8(b,offset,value)
+    buffer.writei8(b,offset,value)
 end
 
 function Kernel.get(b:buffer, offset:number):number
-    return buffer_readi8(b,offset)
+    return buffer.readi8(b,offset)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -61,7 +53,7 @@ local function steped_fill(b: buffer, offset: number, value: number, count: numb
     local stepFactor = item_size * step
 
     for pointer = offset, _size,stepFactor do
-        buffer_writei8(b, pointer, value)
+        buffer.writei8(b, pointer, value)
     end
 end
 
@@ -72,7 +64,7 @@ function Kernel.fill(b: buffer, offset: number, value: number, count: number, st
         return
     end
 
-    buffer_fill(b,offset,value,count)
+    buffer.fill(b,offset,value,count)
 
 end
 
@@ -87,7 +79,7 @@ function Kernel.addS(b: buffer, offset: number, scalar: number, count: number,st
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writei8(b, pointer, buffer_readi8(b, pointer) + scalar)
+        buffer.writei8(b, pointer, buffer.readi8(b, pointer) + scalar)
     end
 end
 
@@ -98,7 +90,7 @@ function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number,st
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writei8(b, pointer, buffer_readi8(b, pointer) * scalar)
+        buffer.writei8(b, pointer, buffer.readi8(b, pointer) * scalar)
     end
 end
 
@@ -109,7 +101,7 @@ function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number,s
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writei8(b, pointer, buffer_readi8(b, pointer) // scalar)
+        buffer.writei8(b, pointer, buffer.readi8(b, pointer) // scalar)
     end
 end
 
@@ -120,7 +112,7 @@ function Kernel.modS(b: buffer, offset: number, scalar: number, count: number,st
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writei8(b, pointer, buffer_readi8(b, pointer) % scalar)
+        buffer.writei8(b, pointer, buffer.readi8(b, pointer) % scalar)
     end
 end
 
@@ -131,7 +123,7 @@ function Kernel.powS(b: buffer, offset: number, scalar: number, count: number,st
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writei8(b, pointer, buffer_readi8(b, pointer) ^ scalar)
+        buffer.writei8(b, pointer, buffer.readi8(b, pointer) ^ scalar)
     end
 end
 

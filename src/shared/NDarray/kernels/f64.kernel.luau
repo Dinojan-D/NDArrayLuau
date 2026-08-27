@@ -7,7 +7,7 @@
 
     Recommanded to only add dirrective native command (@native or --!native).
 
-    date:2026-08-26 13:13
+    date:2026-08-27 10:44
 ]=]
 
 --[=[
@@ -25,14 +25,6 @@
 local types = require(script.Parent.Parent.types)
 
 ---------------------------------------------------------------------------------------------------
--- Functions Localization
----------------------------------------------------------------------------------------------------
-
-local buffer_len = buffer.len
-local buffer_readf64 = buffer.readf64
-local buffer_writef64 = buffer.writef64
-
----------------------------------------------------------------------------------------------------
 
 local Kernel = {}::types.Kernel
 
@@ -43,11 +35,11 @@ local item_size = 8
 -- Seter & Geter
 ---------------------------------------------------------------------------------------------------
 function Kernel.set(b:buffer, offset:number, value:number)
-    buffer_writef64(b,offset,value)
+    buffer.writef64(b,offset,value)
 end
 
 function Kernel.get(b:buffer, offset:number):number
-    return buffer_readf64(b,offset)
+    return buffer.readf64(b,offset)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -61,7 +53,7 @@ function Kernel.fill(b: buffer, offset: number, scalar: number, count: number, s
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writef64(b, pointer, scalar)
+        buffer.writef64(b, pointer, scalar)
     end
 end
 
@@ -76,7 +68,7 @@ function Kernel.addS(b: buffer, offset: number, scalar: number, count: number,st
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writef64(b, pointer, buffer_readf64(b, pointer) + scalar)
+        buffer.writef64(b, pointer, buffer.readf64(b, pointer) + scalar)
     end
 end
 
@@ -87,7 +79,7 @@ function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number,st
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writef64(b, pointer, buffer_readf64(b, pointer) * scalar)
+        buffer.writef64(b, pointer, buffer.readf64(b, pointer) * scalar)
     end
 end
 
@@ -98,7 +90,7 @@ function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number,s
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writef64(b, pointer, buffer_readf64(b, pointer) // scalar)
+        buffer.writef64(b, pointer, buffer.readf64(b, pointer) // scalar)
     end
 end
 
@@ -109,7 +101,7 @@ function Kernel.modS(b: buffer, offset: number, scalar: number, count: number,st
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writef64(b, pointer, buffer_readf64(b, pointer) % scalar)
+        buffer.writef64(b, pointer, buffer.readf64(b, pointer) % scalar)
     end
 end
 
@@ -120,7 +112,7 @@ function Kernel.powS(b: buffer, offset: number, scalar: number, count: number,st
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer_writef64(b, pointer, buffer_readf64(b, pointer) ^ scalar)
+        buffer.writef64(b, pointer, buffer.readf64(b, pointer) ^ scalar)
     end
 end
 

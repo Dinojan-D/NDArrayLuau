@@ -23,13 +23,6 @@
 
 local types = require(script.Parent.Parent.types)
 
----------------------------------------------------------------------------------------------------
--- Functions Localization
----------------------------------------------------------------------------------------------------
-
-local buffer_len = buffer.len
-local buffer_read{{dtype}} = buffer.read{{dtype}}
-local buffer_write{{dtype}} = buffer.write{{dtype}}
 
 ---------------------------------------------------------------------------------------------------
 {% import "components/fill_methods.luau.j2" as fill_methods %}
@@ -46,11 +39,11 @@ local item_size = {{byte_size}}
 -- Seter & Geter
 ---------------------------------------------------------------------------------------------------
 function Kernel.set(b:buffer, offset:number, value:number)
-    buffer_write{{dtype}}(b,offset,value)
+    buffer.write{{dtype}}(b,offset,value)
 end
 
 function Kernel.get(b:buffer, offset:number):number
-    return buffer_read{{dtype}}(b,offset)
+    return buffer.read{{dtype}}(b,offset)
 end
 
 ---------------------------------------------------------------------------------------------------
