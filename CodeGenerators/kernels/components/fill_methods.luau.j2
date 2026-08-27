@@ -11,7 +11,6 @@ local function steped_fill(b: buffer, offset: number, value: number, count: numb
     end
 end
 
-local buffer_fill = buffer.fill
 function Kernel.fill(b: buffer, offset: number, value: number, count: number, step:number?)
     if (step) then
         steped_fill(b,offset,value,count,step)

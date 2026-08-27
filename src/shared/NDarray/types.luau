@@ -132,6 +132,9 @@ export type Kernel = {
     -- Multiplies each element by a scalar.
     mulS: (b: buffer, offset: number, scalar: number, count: number,step:number?) -> (),
 
+    -- perform division by a scalar.
+    divS: (b: buffer, offset: number, scalar: number, count: number,step:number?) -> (),
+
     -- Performs integer (floor) division by a scalar.
     idivS: (b: buffer, offset: number, scalar: number, count: number,step:number?) -> (),
 

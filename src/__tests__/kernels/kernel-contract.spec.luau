@@ -51,10 +51,12 @@ describe.each(KernelContexts.getAvaiablesKernels())("Kernel contract: $name", fu
         { name = "fill", compute = function(orig, scalar) return scalar end },
         { name = "addS", compute = function(orig, scalar) return orig + scalar end },
         { name = "mulS", compute = function(orig, scalar) return orig * scalar end },
+        { name = "divS", compute = function(orig, scalar) return orig / scalar end },
         { name = "idivS", compute = function(orig, scalar) return orig // scalar end },
         { name = "modS", compute = function(orig, scalar) return orig % scalar end },
         { name = "powS", compute = function(orig, scalar) return orig ^ scalar end },
     })(".$name()", function(item)
+        if (item.name == "divS" and not (metaDtype.valueType == "float") ) then return end
         describe("offset/count window isolation", function()
             it("should only mutate excluding the first & last", function()
                 local defaultValue = 3
@@ -195,5 +197,14 @@ describe.each(KernelContexts.getAvaiablesKernels())("Kernel contract: $name", fu
                 end
             end)
 end)
+    end)
+
+    describe(".divS()",function()
+        if (metaDtype.valueType == "float") then return end
+        it("should throw an error if we are using with integrer kernel",function()
+            expect(function()
+                kernel.divS(buffer.create(5*itemSize), 0, 2, 5)
+            end).toThrow()
+        end)
     end)
 end)

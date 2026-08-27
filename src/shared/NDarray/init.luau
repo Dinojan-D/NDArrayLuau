@@ -279,7 +279,7 @@ function NDarray:_scalarInPlace(scalar:number,operation:"add" | "sub" | "mul" | 
     elseif (operation == "mul") then
         self._kernel.mulS(self._buffer, self.offset, scalar,self.size)
     elseif (operation == "div") then
-        self._kernel.mulS(self._buffer, self.offset, 1/scalar,self.size)
+        self._kernel.divS(self._buffer, self.offset, scalar,self.size)
     elseif (operation == "idiv") then
         self._kernel.idivS(self._buffer, self.offset, scalar,self.size)
     elseif (operation == "mod") then

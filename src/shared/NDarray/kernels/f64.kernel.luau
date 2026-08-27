@@ -7,7 +7,7 @@
 
     Recommanded to only add dirrective native command (@native or --!native).
 
-    date:2026-08-27 10:44
+    date:2026-08-27 11:27
 ]=]
 
 --[=[
@@ -61,57 +61,74 @@ end
 -- Scalar Transformations By Math Operators
 ---------------------------------------------------------------------------------------------------
 
-function Kernel.addS(b: buffer, offset: number, scalar: number, count: number,step: number?)
-    local _size = offset+count*item_size
-    _size -=item_size
+function Kernel.addS(b: buffer, offset: number, scalar: number, count: number, step: number?)
+
+    local _size = offset + count * item_size
+    _size -= item_size
 
     local stepFactor = item_size * (step or 1)
 
-    for pointer = offset, _size,stepFactor do
+    for pointer = offset, _size, stepFactor do
         buffer.writef64(b, pointer, buffer.readf64(b, pointer) + scalar)
     end
 end
 
-function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number,step: number?)
-    local _size = offset+count*item_size
-    _size -=item_size
+function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number, step: number?)
+
+    local _size = offset + count * item_size
+    _size -= item_size
 
     local stepFactor = item_size * (step or 1)
 
-    for pointer = offset, _size,stepFactor do
+    for pointer = offset, _size, stepFactor do
         buffer.writef64(b, pointer, buffer.readf64(b, pointer) * scalar)
     end
 end
 
-function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number,step: number?)
-    local _size = offset+count*item_size
-    _size -=item_size
+function Kernel.divS(b: buffer, offset: number, scalar: number, count: number, step: number?)
+
+    local _size = offset + count * item_size
+    _size -= item_size
 
     local stepFactor = item_size * (step or 1)
 
-    for pointer = offset, _size,stepFactor do
+    for pointer = offset, _size, stepFactor do
+        buffer.writef64(b, pointer, buffer.readf64(b, pointer) / scalar)
+    end
+end
+
+function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number, step: number?)
+
+    local _size = offset + count * item_size
+    _size -= item_size
+
+    local stepFactor = item_size * (step or 1)
+
+    for pointer = offset, _size, stepFactor do
         buffer.writef64(b, pointer, buffer.readf64(b, pointer) // scalar)
     end
 end
 
-function Kernel.modS(b: buffer, offset: number, scalar: number, count: number,step: number?)
-    local _size = offset+count*item_size
-    _size -=item_size
+function Kernel.modS(b: buffer, offset: number, scalar: number, count: number, step: number?)
+
+    local _size = offset + count * item_size
+    _size -= item_size
 
     local stepFactor = item_size * (step or 1)
 
-    for pointer = offset, _size,stepFactor do
+    for pointer = offset, _size, stepFactor do
         buffer.writef64(b, pointer, buffer.readf64(b, pointer) % scalar)
     end
 end
 
-function Kernel.powS(b: buffer, offset: number, scalar: number, count: number,step: number?)
-    local _size = offset+count*item_size
-    _size -=item_size
+function Kernel.powS(b: buffer, offset: number, scalar: number, count: number, step: number?)
+
+    local _size = offset + count * item_size
+    _size -= item_size
 
     local stepFactor = item_size * (step or 1)
 
-    for pointer = offset, _size,stepFactor do
+    for pointer = offset, _size, stepFactor do
         buffer.writef64(b, pointer, buffer.readf64(b, pointer) ^ scalar)
     end
 end
