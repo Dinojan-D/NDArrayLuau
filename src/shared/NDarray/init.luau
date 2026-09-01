@@ -194,7 +194,7 @@ function NDarray:getElement(coordinate:{number}):number
         error(ErrorsMessages.InvalidCoordinate(coordinate, self.shape),2)
     end
 
-    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides)
+    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides) *  self.dtypeMetadata.itemSize
     return self._kernel.get(self._buffer,index1D)
 end
 
@@ -225,7 +225,7 @@ function NDarray:setElement(coordinate:{number},value:number)
         error(ErrorsMessages.InvalidCoordinate(coordinate, self.shape),2)
     end
 
-    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides)
+    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides) * self.dtypeMetadata.itemSize
 
     return self._kernel.set(self._buffer, index1D, value)
 end
