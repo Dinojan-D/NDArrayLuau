@@ -21,6 +21,66 @@ Goal : Recreate a fast, memory-efficient **N-Dimensional Array** inside the Robl
 - **Separation of Memory and View:** The multidimensional structure is a mathematical illusion. The data is 1D; the shape and the strides define how it is read and manipulated using [Row-Major Order](https://en.wikipedia.org/wiki/Row-_and_column-major_order).
 - **Mathematical Foundations:** This unified 1D structure serves as the raw grid for multi-dimensional operations. By using Row-Major Order equations, we can apply element-wise arithmetic, linear algebra, and reductions across the array, treating the underlying linear buffer as a true mathematical tensor.
 
+## What works
+
+**Data types:** `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `f32`, `f64`. Each dtype has its own generated kernel, all covered by the kernel contract tests.
+
+### Creating arrays
+
+```lua
+local NDarray = require(ReplicatedStorage.Shared.NDarray)
+
+local a = NDarray.zeros({2, 3}, "f32")
+local b = NDarray.ones({4}, "u8")
+local c = NDarray.copy(a)  -- independent buffer
+```
+
+### Reading and writing (0-indexed coordinates)
+
+```lua
+a:fill(2)
+a:setElement({1, 2}, 42)
+print(a:getElement({1, 2}))
+```
+
+Values are checked against the dtype range, and coordinates against the shape.
+
+### In-place operators (scalar)
+
+`iadd`, `isub`, `imul`, `idiv`, `iidiv`, `ipow`, `imod`
+
+```lua
+a:iadd(1.5):imul(2)  -- chainable, returns the same array
+```
+
+- On integer dtypes, `idiv` performs floor division.
+- Division or modulo by zero raises an error.
+- Integer overflow wraps around.
+
+### Out-of-place operators (scalar on the right)
+
+`+ - * / // ^ %` return a new array and leave the original untouched.
+
+```lua
+local d = a * 2
+local e = a % 3
+```
+
+### Views
+
+`a:transpose()` returns a view that shares the buffer (shape and strides reversed, no data copied).
+
+### Kernel level
+
+Every kernel operation (`fill`, `addS`, `mulS`, `divS`, `idivS`, `modS`, `powS`) supports an `offset`, a `count` and a `step`, so strided iteration is tested at the kernel level.
+
+### Known limitations
+
+- `NDarray.fromArray` is not implemented yet.
+- Array-with-array operations and `scalar op array` (e.g. `2 + a`) raise a "not implemented" error.
+- Slicing: the slice and length utilities and the strided kernels exist, but there is no public slicing API on `NDarray` yet.
+- Some small logic issues probably remain.
+
 ## Developpers Informations
 
 ### Contributing

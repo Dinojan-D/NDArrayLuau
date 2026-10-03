@@ -130,6 +130,7 @@ end
     @return ndarray : A new NDArray containing the values from the input table.
 ]=]
 function NDarray.fromArray(object,dtype:types.DtypeName):NDArray
+    error(ErrorsMessages.Formatter("NotImplementedError", "Sorry this constructor is not implemented."),2)
     local shape = {}
     --to implement
     local self = NDarray._new(shape,dtype,0)
@@ -190,6 +191,8 @@ end
     @return number : Value stored at the given coordinate.
 ]=]
 function NDarray:getElement(coordinate:{number}):number
+    coordinate = table.clone(coordinate)
+
     if (not Utils.isValidCoordinate(coordinate, self.shape)) then
         error(ErrorsMessages.InvalidCoordinate(coordinate, self.shape),2)
     end
@@ -215,6 +218,8 @@ end
     @param value : New value assigned to the element.
 ]=]
 function NDarray:setElement(coordinate:{number},value:number)
+    coordinate = table.clone(coordinate)
+
     local max,min = self.dtypeMetadata.maxNumber,self.dtypeMetadata.minNumber
 
     if (value < min or value > max) then
