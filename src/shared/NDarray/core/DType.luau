@@ -1,0 +1,162 @@
+--!strict
+--[=[
+    ===============================================================================
+                                    DType Module
+    ===============================================================================
+
+    Provides metadata describing every numerical data type supported by NDArray.
+
+    This module exposes:
+        • The list of supported data types.
+        • Immutable metadata for each data type.
+        • Utilities for retrieving data type information.
+
+    This module is part of the public NDArray API.
+]=]
+
+local types = require(script.Parent.Parent.types)
+local Utils = require(script.Parent.Utils)
+
+--[=[
+    Provides metadata and utilities for the numerical data types supported
+    by NDArray.
+
+    This module defines:
+    - the list of supported data types (`DType.Enum`);
+    - immutable metadata associated with each data type;
+    - helper functions for retrieving data type information.
+]=]
+local DType = {}
+
+DType.Enum = {
+    i8 = "i8",
+    u8 = "u8",
+    i16 = "i16",
+    u16 = "u16",
+    i32 = "i32",
+    u32 = "u32",
+    f32 = "f32",
+    f64 = "f64",
+} :: { [string]: types.DtypeName }
+
+
+local metadata: { [types.DtypeName]: types.DtypeMetadata } = {
+    i8 = {
+        name = "i8",
+        itemSize = 1,
+        maxNumber = 127,
+        minNumber = -128,
+        valueType = "signed",
+    },
+
+    u8 = {
+        name = "u8",
+        itemSize = 1,
+        maxNumber = 255,
+        minNumber = 0,
+        valueType = "unsigned",
+    },
+
+    i16 = {
+        name = "i16",
+        itemSize = 2,
+        maxNumber = 32767,
+        minNumber = -32768, 
+        valueType = "signed",
+    },
+
+    u16 = {
+        name = "u16",
+        itemSize = 2,
+        maxNumber = 65535,
+        minNumber = 0,
+        valueType = "unsigned",
+    },
+
+    i32 = {
+        name = "i32",
+        itemSize = 4,
+        maxNumber = 2147483647,
+        minNumber = -2147483648,
+        valueType = "signed",
+    },
+
+    u32 = {
+        name = "u32",
+        itemSize = 4,
+        maxNumber = 4294967295,
+        minNumber = 0,
+        valueType = "unsigned",
+    },
+
+    f32 = {
+        name = "f32",
+        itemSize = 4,
+        maxNumber = math.huge,
+        minNumber = -math.huge,
+        valueType = "float",
+    },
+
+    f64 = {
+        name = "f64",
+        itemSize = 8,
+        maxNumber = math.huge,
+        minNumber = -math.huge,
+        valueType = "float",
+    },
+}
+
+DType._Metadata = metadata
+
+table.freeze(DType._Metadata)
+for _, object in pairs(DType._Metadata) do
+    table.freeze(object)
+end
+table.freeze(DType.Enum)
+
+--[=[
+    Returns the metadata associated with a data type.
+
+    The returned object is immutable and must not be modified.
+
+    @param dtype : Data type (e.g. DType.Enum.i8).
+    @return DtypeObject : Metadata describing the specified data type.
+]=]
+function DType.getDtypeMetadata(dtype:types.DtypeName):types.DtypeMetadata
+    return DType._Metadata[dtype]
+end
+
+--[=[
+    Returns the dtype caster associated with this data type.
+
+    The returned object is a function that cast the given number value, using Utils.castI & Utils.castU.
+    Its use a use a 4bytes sized buffer for casting 32bis float (f32)
+    We don't need caster for f64(double) cause in luau we are already in f64.
+
+    @param dtype : Data type (e.g. DType.Enum.i8).
+    @return (number)->number : a function that cast the given number value 
+]=]
+function DType.getCaster(dtype:types.DtypeName):(number)->number
+    local meta = DType.getDtypeMetadata(dtype)
+    local valueType = meta.valueType
+    local bits = meta.itemSize * 8
+
+    if valueType == "signed" then
+        return function (a:number) return Utils.castI(bits, a) end
+    end
+    if  valueType == "unsigned" then
+        return function (a:number) return Utils.castU(bits, a) end
+    end
+
+    if (valueType) == "float" and bits == 32 then
+        return function(a: number)
+            local scratchF32 = buffer.create(4)
+            buffer.writef32(scratchF32, 0, a)
+            return buffer.readf32(scratchF32, 0)
+        end
+    end
+
+    return function (a:number) return a end
+end
+
+return DType

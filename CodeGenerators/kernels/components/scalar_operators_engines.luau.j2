@@ -1,0 +1,13 @@
+{% macro classic(dtype, op_name, op_symbol, item_size) %}
+function Kernel.{{ op_name }}S(b: buffer, offset: number, scalar: number, count: number, step: number?)
+{% if op_name == 'div' and dtype[0] in ["u","i"] %}error("[NDARAY LIB ERROR]: divion is not available for integers types!"){% else %}
+    local _size = offset + count * item_size
+    _size -= item_size
+    
+    local stepFactor = item_size * (step or 1)
+
+    for pointer = offset, _size, stepFactor do
+        buffer.write{{dtype}}(b, pointer, buffer.read{{dtype}}(b, pointer) {{ op_symbol }} scalar)        
+    end{% endif %}
+end
+{% endmacro %}
