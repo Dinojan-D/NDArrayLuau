@@ -130,6 +130,8 @@ end
     Returns the dtype caster associated with this data type.
 
     The returned object is a function that cast the given number value, using Utils.castI & Utils.castU.
+    Its use a use a 4bytes sized buffer for casting 32bis float (f32)
+    We don't need caster for f64(double) cause in luau we are already in f64.
 
     @param dtype : Data type (e.g. DType.Enum.i8).
     @return (number)->number : a function that cast the given number value 
@@ -144,6 +146,14 @@ function DType.getCaster(dtype:types.DtypeName):(number)->number
     end
     if  valueType == "unsigned" then
         return function (a:number) return Utils.castU(bits, a) end
+    end
+
+    if (valueType) == "float" and bits == 32 then
+        return function(a: number)
+            local scratchF32 = buffer.create(4)
+            buffer.writef32(scratchF32, 0, a)
+            return buffer.readf32(scratchF32, 0)
+        end
     end
 
     return function (a:number) return a end

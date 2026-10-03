@@ -12,12 +12,12 @@
 
 --[=[
     ===============================================================================
-                                  i8-Bits Kernel
+                                  f32-Bits Kernel
     ===============================================================================
 
     PRIVATE USE
 
-    Implements low-level operations for all i8-bits signed-integer data types.
+    Implements low-level operations for all f32-bits single-precision-float data types.
 
     All operations work directly on raw buffers for maximum performance.
 ]=]
@@ -29,42 +29,32 @@ local types = require(script.Parent.Parent.types)
 local Kernel = {}::types.Kernel
 
 --the byte size of the data type
-local item_size = 1
+local item_size = 4
 
 ---------------------------------------------------------------------------------------------------
 -- Seter & Geter
 ---------------------------------------------------------------------------------------------------
 function Kernel.set(b:buffer, offset:number, value:number)
-    buffer.writei8(b,offset,value)
+    buffer.writef32(b,offset,value)
 end
 
 function Kernel.get(b:buffer, offset:number):number
-    return buffer.readi8(b,offset)
+    return buffer.readf32(b,offset)
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Scalar Transformations
 ---------------------------------------------------------------------------------------------------
 
-local function steped_fill(b: buffer, offset: number, value: number, count: number, step:number)
+function Kernel.fill(b: buffer, offset: number, scalar: number, count: number, step:number?)
     local _size = offset+count*item_size
     _size -=item_size
 
-    local stepFactor = item_size * step
+    local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size,stepFactor do
-        buffer.writei8(b, pointer, value)
+        buffer.writef32(b, pointer, scalar)
     end
-end
-
-function Kernel.fill(b: buffer, offset: number, value: number, count: number, step:number?)
-    if (step) then
-        steped_fill(b,offset,value,count,step)
-        return
-    end
-
-    buffer.fill(b,offset,value,count)
-
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -79,7 +69,7 @@ function Kernel.addS(b: buffer, offset: number, scalar: number, count: number, s
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size, stepFactor do
-        buffer.writei8(b, pointer, buffer.readi8(b, pointer) + scalar)
+        buffer.writef32(b, pointer, buffer.readf32(b, pointer) + scalar)
     end
 end
 
@@ -91,12 +81,20 @@ function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number, s
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size, stepFactor do
-        buffer.writei8(b, pointer, buffer.readi8(b, pointer) * scalar)
+        buffer.writef32(b, pointer, buffer.readf32(b, pointer) * scalar)
     end
 end
 
 function Kernel.divS(b: buffer, offset: number, scalar: number, count: number, step: number?)
-error("[NDARAY LIB ERROR]: divion is not available for integers types!")
+
+    local _size = offset + count * item_size
+    _size -= item_size
+
+    local stepFactor = item_size * (step or 1)
+
+    for pointer = offset, _size, stepFactor do
+        buffer.writef32(b, pointer, buffer.readf32(b, pointer) / scalar)
+    end
 end
 
 function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number, step: number?)
@@ -107,7 +105,7 @@ function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number, 
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size, stepFactor do
-        buffer.writei8(b, pointer, buffer.readi8(b, pointer) // scalar)
+        buffer.writef32(b, pointer, buffer.readf32(b, pointer) // scalar)
     end
 end
 
@@ -119,7 +117,7 @@ function Kernel.modS(b: buffer, offset: number, scalar: number, count: number, s
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size, stepFactor do
-        buffer.writei8(b, pointer, buffer.readi8(b, pointer) % scalar)
+        buffer.writef32(b, pointer, buffer.readf32(b, pointer) % scalar)
     end
 end
 
@@ -131,7 +129,7 @@ function Kernel.powS(b: buffer, offset: number, scalar: number, count: number, s
     local stepFactor = item_size * (step or 1)
 
     for pointer = offset, _size, stepFactor do
-        buffer.writei8(b, pointer, buffer.readi8(b, pointer) ^ scalar)
+        buffer.writef32(b, pointer, buffer.readf32(b, pointer) ^ scalar)
     end
 end
 

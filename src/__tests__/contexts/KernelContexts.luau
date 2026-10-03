@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local JestGlobals = require(ReplicatedStorage.DevPackages.JestGlobals)
-local DType = require(ReplicatedStorage.Shared.NDarray.core.DType)
 local kernels = require(ReplicatedStorage.Shared.NDarray.kernels)
 local types = require(ReplicatedStorage.Shared.NDarray.types)
 

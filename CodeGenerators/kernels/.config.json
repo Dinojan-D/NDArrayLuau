@@ -9,6 +9,31 @@
         "sOpMethods": "classic",
         "bOpMethods": "classic"
     },
+    "i16": {
+        "fillMethod": "classic",
+        "sOpMethods": "classic",
+        "bOpMethods": "classic"
+    },
+    "u16": {
+        "fillMethod": "classic",
+        "sOpMethods": "classic",
+        "bOpMethods": "classic"
+    },
+    "i32": {
+        "fillMethod": "classic",
+        "sOpMethods": "classic",
+        "bOpMethods": "classic"
+    },
+    "u32": {
+        "fillMethod": "classic",
+        "sOpMethods": "classic",
+        "bOpMethods": "classic"
+    },
+    "f32": {
+        "fillMethod": "classic",
+        "sOpMethods": "classic",
+        "bOpMethods": "classic"
+    },
     "f64": {
         "fillMethod": "classic",
         "sOpMethods": "classic",
