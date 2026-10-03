@@ -42,8 +42,8 @@ A kernel is a ModuleScript containing array manipulation/transformation function
 
 - **Compiler & Native Optimizations:**
 
-  A predictable, monomorphic code enables the Luau compiler and native code generator (--!native) to perform aggressive optimizations. These include automatic function inlining, loop unrolling, and direct fastcall for libs(table,buffer,bit32,vector,...).
+  A predictable, monomorphic code enables the Luau compiler and native code generator (--!native) to perform aggressive optimizations (its not 100% sur but we need to take the best advantage from this) . These include automatic function inlining, loop unrolling, and direct fastcall for libs(table,buffer,bit32,vector,...).
 
 - **Specific usage per projects:**
 
-  Luau native compilation comes with binary size limits and compilation trade-offs. Isolating each data type into its own ModuleScript allows developers to selectively apply the `--!native` directive (or `@native` function attribute) only to high-throughput kernels, avoiding native code bloat and compilation limits across non-critical parts of the project.
+  Luau native compilation comes with binary size limits and compilation trade-offs. Isolating each data type into its own ModuleScript allows developers to selectively apply the `--!native` directive (or `@native` function attribute) only to high-throughput kernels, avoiding native code bloat and compilation limits across non-critical parts of the project (before anything we need to be sure that we will ensure that --!native have real benefit for our implementation) .

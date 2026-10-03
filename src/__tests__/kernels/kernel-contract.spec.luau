@@ -1,9 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local JestGlobals = require(ReplicatedStorage.DevPackages.JestGlobals)
-local NDarray = require(ReplicatedStorage.Shared.NDarray)
 local DType = require(ReplicatedStorage.Shared.NDarray.core.DType)
-local ErrorsMessages = require(ReplicatedStorage.Shared.NDarray.core.ErrorsMessages)
-local Utils = require(ReplicatedStorage.Shared.NDarray.core.Utils)
 local types = require(ReplicatedStorage.Shared.NDarray.types)
 local KernelContexts = require(ReplicatedStorage.tests.contexts.KernelContexts)
 local KernelOracle = require(ReplicatedStorage.tests.contexts.KernelOracle)
@@ -13,18 +10,7 @@ local it = JestGlobals.it
 local expect = JestGlobals.expect
 local beforeEach = JestGlobals.beforeEach
 
-local function castValue(meta: types.DtypeMetadata, value: number): number
-    local bitSize = meta.itemSize * 8
 
-    if meta.valueType == "signed" then
-        return Utils.castI(bitSize, value)
-    elseif meta.valueType == "unsigned" then
-        return Utils.castU(bitSize, value)
-    end
-
-    -- Pour "float" (f32/f64), pas de wrap-around binaire
-    return value
-end
 
 describe.each(KernelContexts.getAvaiablesKernels())("Kernel contract: $name", function(kernelInfo: KernelContexts.KernelDescprition)
     local metaDtype = DType.getDtypeMetadata(kernelInfo.name)
@@ -65,10 +51,12 @@ describe.each(KernelContexts.getAvaiablesKernels())("Kernel contract: $name", fu
         { name = "fill", compute = function(orig, scalar) return scalar end },
         { name = "addS", compute = function(orig, scalar) return orig + scalar end },
         { name = "mulS", compute = function(orig, scalar) return orig * scalar end },
+        { name = "divS", compute = function(orig, scalar) return orig / scalar end },
         { name = "idivS", compute = function(orig, scalar) return orig // scalar end },
         { name = "modS", compute = function(orig, scalar) return orig % scalar end },
         { name = "powS", compute = function(orig, scalar) return orig ^ scalar end },
     })(".$name()", function(item)
+        if (item.name == "divS" and not (metaDtype.valueType == "float") ) then return end
         describe("offset/count window isolation", function()
             it("should only mutate excluding the first & last", function()
                 local defaultValue = 3
@@ -150,6 +138,73 @@ describe.each(KernelContexts.getAvaiablesKernels())("Kernel contract: $name", fu
                 local received = kernel.get(b, pointer)
                 expect(received).toBe(cast(item.compute(cast(defaultValue), transValue)))
             end
+        end)
+        describe("strided operation (step parameter)", function()
+            it("should mutate elements at regular intervals starting from index 0 (step = 2)", function()
+                local defaultValue = 3
+                KernelOracle.fillBuffer(b, kernelInfo.name, defaultValue)
+
+                local transValue = 5
+                local offset = 0
+                local count = 4
+                local step = 2
+
+                kernel[item.name](b, offset, transValue, count, step)
+
+                local expectedTouchedIndices = {}
+                for i = 0, (count-1)//step do
+                    local touchedElemIndex =offset + (itemSize*step*i)
+                    expectedTouchedIndices[touchedElemIndex] = true
+                end
+
+                for pointer = 0, bufferSize-itemSize,itemSize do
+                    local received = kernel.get(b, pointer)
+
+                    if expectedTouchedIndices[pointer] then
+                        expect(received).toBe(cast(item.compute(cast(defaultValue), transValue)))
+                    else
+                        expect(received).toBe(defaultValue)
+                    end
+                end
+            end)
+
+            it("should handle non-zero offset combined with step > 1 (offset = 1, step = 3)", function()
+                local defaultValue = 3
+                KernelOracle.fillBuffer(b, kernelInfo.name, defaultValue)
+
+                local transValue = 5
+                local startElem = 1
+                local offset = startElem * itemSize
+                local count = 3
+                local step = 3
+
+                kernel[item.name](b, offset, transValue, count, step)
+
+                local expectedTouchedIndices = {}
+                for i = 0, (count-1)//step do
+                    local touchedElemIndex =offset + (itemSize*step*i)
+                    expectedTouchedIndices[touchedElemIndex] = true
+                end
+
+                for pointer = 0, bufferSize-itemSize,itemSize do
+                    local received = kernel.get(b, pointer)
+
+                    if expectedTouchedIndices[pointer] then
+                        expect(received).toBe(cast(item.compute(cast(defaultValue), transValue)))
+                    else
+                        expect(received).toBe(defaultValue)
+                    end
+                end
+            end)
+end)
+    end)
+
+    describe(".divS()",function()
+        if (metaDtype.valueType == "float") then return end
+        it("should throw an error if we are using with integrer kernel",function()
+            expect(function()
+                kernel.divS(buffer.create(5*itemSize), 0, 2, 5)
+            end).toThrow()
         end)
     end)
 end)

@@ -194,7 +194,7 @@ function NDarray:getElement(coordinate:{number}):number
         error(ErrorsMessages.InvalidCoordinate(coordinate, self.shape),2)
     end
 
-    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides)
+    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides) *  self.dtypeMetadata.itemSize
     return self._kernel.get(self._buffer,index1D)
 end
 
@@ -225,7 +225,7 @@ function NDarray:setElement(coordinate:{number},value:number)
         error(ErrorsMessages.InvalidCoordinate(coordinate, self.shape),2)
     end
 
-    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides)
+    local index1D = Utils.computeRowMajorIndex(coordinate, self.strides) * self.dtypeMetadata.itemSize
 
     return self._kernel.set(self._buffer, index1D, value)
 end
@@ -279,7 +279,7 @@ function NDarray:_scalarInPlace(scalar:number,operation:"add" | "sub" | "mul" | 
     elseif (operation == "mul") then
         self._kernel.mulS(self._buffer, self.offset, scalar,self.size)
     elseif (operation == "div") then
-        self._kernel.mulS(self._buffer, self.offset, 1/scalar,self.size)
+        self._kernel.divS(self._buffer, self.offset, scalar,self.size)
     elseif (operation == "idiv") then
         self._kernel.idivS(self._buffer, self.offset, scalar,self.size)
     elseif (operation == "mod") then

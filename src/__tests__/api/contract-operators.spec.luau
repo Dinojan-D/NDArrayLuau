@@ -26,7 +26,7 @@ local InPlaceOperators: {MethodDescription} = {
     {callName = "iadd",  action = "addition",       kernelMethod = "addS"},
     {callName = "isub",  action = "subtract",       kernelMethod = "addS",  transformScalar = function(s) return -s end},
     {callName = "imul",  action = "multiply",       kernelMethod = "mulS"},
-    {callName = "idiv",  action = "division",       kernelMethod = "mulS",  transformScalar = function(s) return 1 / s end},
+    {callName = "idiv",  action = "division",       kernelMethod = "divS",},
     {callName = "iidiv", action = "floor division", kernelMethod = "idivS"},
     {callName = "imod",  action = "modulo",         kernelMethod = "modS"},
     {callName = "ipow",  action = "power",          kernelMethod = "powS"},

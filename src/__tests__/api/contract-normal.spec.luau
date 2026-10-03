@@ -206,15 +206,15 @@ describe("NDarray contract test : general ",function()
 
     describe(":getElement()", function()
         it("should return the value at the specified coordinate", function()
-            local array = NDarray._new({2, 3}, DEFAULT_DTYPE)
-            array._kernel = KernelContexts.mockedKernel(DEFAULT_DTYPE)
+            local array = NDarray._new({2, 3}, "f64")
+            array._kernel = KernelContexts.mockedKernel("f64")
 
             -- Shape {2, 3} with strides {3, 1}
             --  {0, 1} -> Offset = (0 * 3) + (1 * 1) = 1
             local coords = {0, 1}
-            local index = 1
+            local index = 1*8
             local value = 5
-            buffer.writei8(array._buffer, index, value)
+            buffer.writef64(array._buffer, index, value)
 
             expect(array:getElement(coords)).toBe(value)
             expect(array._kernel.get).toHaveBeenCalledWith(expect.anything(),index)
@@ -242,13 +242,13 @@ describe("NDarray contract test : general ",function()
 
     describe(":setElement()", function()
         it("should set the value at the specified coordinate", function()
-            local array = NDarray._new({2, 3}, DEFAULT_DTYPE)
-            array._kernel = KernelContexts.mockedKernel(DEFAULT_DTYPE)
+            local array = NDarray._new({2, 3}, "f64")
+            array._kernel = KernelContexts.mockedKernel("f64")
 
             -- Shape {2, 3} with strides {3, 1}
             --{0, 1} -> Offset = (0 * 3) + (1 * 1) = 1
             local coords = {0, 1}
-            local index = 1
+            local index = 1*8
             local value = 5
             array:setElement(coords, value)
 
@@ -256,7 +256,7 @@ describe("NDarray contract test : general ",function()
             expect(array._kernel.set).toHaveBeenCalledTimes(1)
             local calls = array._kernel.set.mock.calls
             expect(calls[1][1] == array._buffer).toBe(true)
-            expect(buffer.readi8(array._buffer, index)).toBe(value)
+            expect(buffer.readf64(array._buffer, index)).toBe(value)
 
         end)
 

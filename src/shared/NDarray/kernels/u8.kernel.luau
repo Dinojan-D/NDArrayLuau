@@ -7,7 +7,7 @@
 
     Recommanded to only add dirrective native command (@native or --!native).
 
-    date:2026-08-24 11:12
+    date:2026-08-27 11:27
 ]=]
 
 --[=[
@@ -25,14 +25,6 @@
 local types = require(script.Parent.Parent.types)
 
 ---------------------------------------------------------------------------------------------------
--- Functions Localization
----------------------------------------------------------------------------------------------------
-
-local buffer_len = buffer.len
-local buffer_readu8 = buffer.readu8
-local buffer_writeu8 = buffer.writeu8
-
----------------------------------------------------------------------------------------------------
 
 local Kernel = {}::types.Kernel
 
@@ -43,68 +35,103 @@ local item_size = 1
 -- Seter & Geter
 ---------------------------------------------------------------------------------------------------
 function Kernel.set(b:buffer, offset:number, value:number)
-    buffer_writeu8(b,offset,value)
+    buffer.writeu8(b,offset,value)
 end
 
 function Kernel.get(b:buffer, offset:number):number
-    return buffer_readu8(b,offset)
+    return buffer.readu8(b,offset)
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Scalar Transformations
 ---------------------------------------------------------------------------------------------------
 
-local buffer_fill = buffer.fill
-function Kernel.fill(b: buffer, offset: number, value: number, count: number)
-    buffer_fill(b,offset,value,count)
+local function steped_fill(b: buffer, offset: number, value: number, count: number, step:number)
+    local _size = offset+count*item_size
+    _size -=item_size
+
+    local stepFactor = item_size * step
+
+    for pointer = offset, _size,stepFactor do
+        buffer.writeu8(b, pointer, value)
+    end
+end
+
+function Kernel.fill(b: buffer, offset: number, value: number, count: number, step:number?)
+    if (step) then
+        steped_fill(b,offset,value,count,step)
+        return
+    end
+
+    buffer.fill(b,offset,value,count)
+
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Scalar Transformations By Math Operators
 ---------------------------------------------------------------------------------------------------
 
-function Kernel.addS(b: buffer, offset: number, scalar: number, count: number)
-    local _size = offset+count*item_size
-    _size -=1
+function Kernel.addS(b: buffer, offset: number, scalar: number, count: number, step: number?)
 
-    for pointer = offset, _size,item_size do
-        buffer_writeu8(b, pointer, buffer_readu8(b, pointer) + scalar)
+    local _size = offset + count * item_size
+    _size -= item_size
+
+    local stepFactor = item_size * (step or 1)
+
+    for pointer = offset, _size, stepFactor do
+        buffer.writeu8(b, pointer, buffer.readu8(b, pointer) + scalar)
     end
 end
 
-function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number)
-    local _size = offset+count*item_size
-    _size -=1
+function Kernel.mulS(b: buffer, offset: number, scalar: number, count: number, step: number?)
 
-    for pointer = offset, _size,item_size do
-        buffer_writeu8(b, pointer, buffer_readu8(b, pointer) * scalar)
+    local _size = offset + count * item_size
+    _size -= item_size
+
+    local stepFactor = item_size * (step or 1)
+
+    for pointer = offset, _size, stepFactor do
+        buffer.writeu8(b, pointer, buffer.readu8(b, pointer) * scalar)
     end
 end
 
-function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number)
-    local _size = offset+count*item_size
-    _size -=1
+function Kernel.divS(b: buffer, offset: number, scalar: number, count: number, step: number?)
+error("[NDARAY LIB ERROR]: divion is not available for integers types!")
+end
 
-    for pointer = offset, _size,item_size do
-        buffer_writeu8(b, pointer, buffer_readu8(b, pointer) // scalar)
+function Kernel.idivS(b: buffer, offset: number, scalar: number, count: number, step: number?)
+
+    local _size = offset + count * item_size
+    _size -= item_size
+
+    local stepFactor = item_size * (step or 1)
+
+    for pointer = offset, _size, stepFactor do
+        buffer.writeu8(b, pointer, buffer.readu8(b, pointer) // scalar)
     end
 end
 
-function Kernel.modS(b: buffer, offset: number, scalar: number, count: number)
-    local _size = offset+count*item_size
-    _size -=1
+function Kernel.modS(b: buffer, offset: number, scalar: number, count: number, step: number?)
 
-    for pointer = offset, _size,item_size do
-        buffer_writeu8(b, pointer, buffer_readu8(b, pointer) % scalar)
+    local _size = offset + count * item_size
+    _size -= item_size
+
+    local stepFactor = item_size * (step or 1)
+
+    for pointer = offset, _size, stepFactor do
+        buffer.writeu8(b, pointer, buffer.readu8(b, pointer) % scalar)
     end
 end
 
-function Kernel.powS(b: buffer, offset: number, scalar: number, count: number)
-    local _size = offset+count*item_size
-    _size -=1
+function Kernel.powS(b: buffer, offset: number, scalar: number, count: number, step: number?)
 
-    for pointer = offset, _size,item_size do
-        buffer_writeu8(b, pointer, buffer_readu8(b, pointer) ^ scalar)
+    local _size = offset + count * item_size
+    _size -= item_size
+
+    local stepFactor = item_size * (step or 1)
+
+    for pointer = offset, _size, stepFactor do
+        buffer.writeu8(b, pointer, buffer.readu8(b, pointer) ^ scalar)
     end
 end
 

@@ -117,7 +117,7 @@ export type Slices = {
 export type Kernel = {
 
     -- Fills the buffer with a constant value.
-    fill: (b: buffer, offset: number, value: number, count: number) -> (),
+    fill: (b: buffer, offset: number, value: number, count: number,step:number?) -> (),
 
     -- Sets the value to the given index in the buffer.
     set:(b:buffer, offset:number, value:number) -> (),
@@ -127,19 +127,22 @@ export type Kernel = {
 
 ---{Arithmetic scalar operators}------------------------------------------------------------------------------------------------
     -- Adds a scalar to each element.
-    addS: (b: buffer, offset: number, scalar: number, count: number) -> (),
+    addS: (b: buffer, offset: number, scalar: number, count: number,step:number?) -> (),
 
     -- Multiplies each element by a scalar.
-    mulS: (b: buffer, offset: number, scalar: number, count: number) -> (),
+    mulS: (b: buffer, offset: number, scalar: number, count: number,step:number?) -> (),
+
+    -- perform division by a scalar.
+    divS: (b: buffer, offset: number, scalar: number, count: number,step:number?) -> (),
 
     -- Performs integer (floor) division by a scalar.
-    idivS: (b: buffer, offset: number, scalar: number, count: number) -> (),
+    idivS: (b: buffer, offset: number, scalar: number, count: number,step:number?) -> (),
 
     -- Raises each element to a scalar power.
-    powS: (b: buffer, offset: number, scalar: number, count: number) -> (),
+    powS: (b: buffer, offset: number, scalar: number, count: number,step:number?) -> (),
 
     -- Computes the modulo with a scalar.
-    modS: (b: buffer, offset: number, scalar: number, count: number) -> (),
+    modS: (b: buffer, offset: number, scalar: number, count: number,step:number?) -> (),
 
 }
 
